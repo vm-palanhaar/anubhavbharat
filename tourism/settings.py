@@ -1,13 +1,17 @@
+import os
 
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-v06z+1-d5e*_#%3k00hj1qz!s$uqd8w6lvw@y*)()1!w^((g_^'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost',os.getenv('ALLOWED_HOST_1')]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -18,6 +22,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # packages
     'rest_framework',
+    'knox',
     # django apps
     'users',
 ]
@@ -94,10 +99,20 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': "tourism_db_dev",
-        'USER': "postgres",
-        'PASSWORD': "admin",
-        'HOST': "localhost",
-        'PORT': "5432",
+        'NAME': os.getenv('DB_1_PGSQL_NAME'),
+        'USER': os.getenv('DB_1_PGSQL_USER'),
+        'PASSWORD': os.getenv('DB_1_PGSQL_PWD'),
+        'HOST': os.getenv('DB_1_PGSQL_HOST'),
+        'PORT': os.getenv('DB_1_PGSQL_PORT'),
     }
+}
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',),
+}
+
+REST_KNOX = {
+    'TOKEN_TTL': None,
+    'TOKEN_LIMIT_PER_USER': None,
+    'AUTO_REFRESH': False,
 }
