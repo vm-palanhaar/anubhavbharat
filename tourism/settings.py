@@ -113,6 +113,6 @@ REST_FRAMEWORK = {
 
 REST_KNOX = {
     'TOKEN_TTL': None,
-    'TOKEN_LIMIT_PER_USER': None,
-    'AUTO_REFRESH': False,
+    #'TOKEN_LIMIT_PER_USER': None,
+    #'AUTO_REFRESH': False,
 }

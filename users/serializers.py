@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from rest_framework.validators import UniqueValidator
 
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
@@ -25,3 +24,20 @@ class UserSignupSerializer(serializers.ModelSerializer):
         user.save()
 
         return user
+
+class UserLoginSerializer(serializers.ModelSerializer):
+    username = serializers.CharField()
+    first_name = serializers.CharField(read_only=True)
+    last_name = serializers.CharField(read_only=True)
+    is_verified = serializers.BooleanField(read_only=True)
+    password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
+    class Meta:
+        model = UserMdl.User
+        fields = ['username','first_name','last_name','is_verified','password']
+
+    def validate(self, data):
+        user = authenticate(**data)
+        if user:
+            return user
+        return serializers.ValidationError()
+        #raise TExp.CustomValidation('message',UserApiV1Msg.UserLoginMsg.userLoginFailed_UserCredInvalid(), 400)
