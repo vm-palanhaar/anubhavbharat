@@ -2,8 +2,10 @@ from django.contrib.auth import login
 
 from rest_framework import status, generics
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 
 from knox.models import AuthToken
+from knox.auth import TokenAuthentication
 
 from users import models as UserMdl
 from users import serializers as UserSrl
@@ -12,8 +14,9 @@ from users.common.api.v1 import api_msg as UserApiV1Msg
 
 '''
 # Prod
-1.UserSignupApi
+1. UserSignupApi
 2. UserLoginApi
+3. UserLoggedInApi
 # Dev
 '''
 
@@ -34,6 +37,7 @@ def response_403(response_data):
 
 def response_409(response_data):
     return Response(response_data, status=status.HTTP_409_CONFLICT)
+
 
 class UserSignupApi(generics.CreateAPIView):
     serializer_class = UserSrl.UserSignupSerializer
@@ -82,3 +86,16 @@ class UserLoginApi(generics.GenericAPIView):
         response_data = serializer.errors
         response_data['message'] = UserApiV1Msg.UserLoginMsg.userLoginFailed_UserCredInvalid()
         return response_400(response_data)
+    
+
+class UserLoggedInApi(generics.GenericAPIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = UserSrl.UserLoggedInSerializer
+
+    def get(self, request, *args, **kwargs):
+        response_data = {}
+        user = UserMdl.User.objects.get(username = request.user)
+        serializer = self.get_serializer(user)
+        response_data['user'] = serializer.data
+        return response_200(response_data)
