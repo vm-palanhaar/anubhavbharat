@@ -41,3 +41,13 @@ class UserLoginSerializer(serializers.ModelSerializer):
             return user
         return serializers.ValidationError()
         #raise TExp.CustomValidation('message',UserApiV1Msg.UserLoginMsg.userLoginFailed_UserCredInvalid(), 400)
+
+
+class UserLoggedInSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(read_only=True)
+    first_name = serializers.CharField(read_only=True)
+    last_name = serializers.CharField(read_only=True)
+    is_verified = serializers.BooleanField(read_only=True)
+    class Meta:
+        model = UserMdl.User
+        fields = ['username','first_name','last_name','is_verified']
