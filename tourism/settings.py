@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'knox',
     # django apps
     'users',
+    'business',
 ]
 
 AUTH_USER_MODEL = 'users.User'
