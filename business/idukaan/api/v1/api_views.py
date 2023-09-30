@@ -8,6 +8,7 @@ from knox.auth import TokenAuthentication
 
 from business import models as BMdl
 from business import serializers as BSrl
+from business import permissions as BPerm
 from business.idukaan.api.v1 import api_msg as BApiV1Msg
 
 from users import models as UserMdl
@@ -48,6 +49,7 @@ class OrgTypesApi(generics.ListAPIView, PermissionRequiredMixin):
     serializer_class = BSrl.OrgTypesSerializer
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated, UserPerm.IsVerified]
+    
 
 class OrgApi(viewsets.ViewSet, PermissionRequiredMixin):
     authentication_classes = [TokenAuthentication]
@@ -57,12 +59,12 @@ class OrgApi(viewsets.ViewSet, PermissionRequiredMixin):
         response_data = {}
         serializer = BSrl.AddOrgSerializer(data=request.data, context={'user': request.user})
         if serializer.is_valid():
-            org = serializer.validated_data
-            print(org)
             serializer.save()
             response_data['org'] = serializer.data
-            response_data['message'] = 'Thanks for registering your organization with us.'
+            response_data['message'] = BApiV1Msg.AddOrgMsg.addOrgSuccess()
             return response_201(response_data)
+        if serializer.errors['reg_no'][0].code == 'unique':
+            return response_409(BApiV1Msg.AddOrgMsg.addOrgFoundFailed())
         return response_400(serializer.errors)
     
     def list(self, request, *args, **kwargs):
@@ -74,4 +76,4 @@ class OrgApi(viewsets.ViewSet, PermissionRequiredMixin):
                 orgs.append(BSrl.OrgListSerializer(org.org).data)
             response_data['orgList'] = orgs
             return Response(response_data, status=status.HTTP_200_OK)
-        return response_400(BApiV1Msg.businessOrgListNotFound())
+        return response_400(BApiV1Msg.OrgListMsg.orgListFailed_NotFound())
