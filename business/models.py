@@ -16,7 +16,7 @@ class OrgType(TimestampModel):
 
 
 def upload_to_org(instance,filename):
-    folder_name = f'{instance.name}_{instance.created_at}'
+    folder_name = f'{instance.name} _ {instance.created_at}'
     return f'business/org/{folder_name}/{filename}'
 
 
