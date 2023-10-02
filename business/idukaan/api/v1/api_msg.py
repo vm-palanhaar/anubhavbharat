@@ -37,6 +37,15 @@ class OrgListMsg:
         "will remain disabled. To verify your organization, please refer to the Settings and Help section.\n"\
 
 
+def businessOrgEmpSelfNotFound():
+    return {
+        'error' : {
+            'code' : 'businessSelfOrgEmpNotFound_iDukaan',
+            'message' : 'You are no longer associated with organization.'
+        }
+    }
+
+
 def businessOrgNotVerified(orgName):
     return {
         'error' : {

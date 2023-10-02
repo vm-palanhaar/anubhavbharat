@@ -25,6 +25,12 @@ PROD
 DEV
 '''
 
+def validateOrgEmpObj(user, org):
+        try:
+            return BMdl.OrgEmp.objects.get(user=user, org=org)
+        except BMdl.OrgEmp.DoesNotExist:
+            return None
+
 def response_200(response_data):
     return Response(response_data, status=status.HTTP_200_OK)
 
@@ -78,3 +84,10 @@ class OrgApi(viewsets.ViewSet, PermissionRequiredMixin):
             response_data['is_verified_msg'] = BApiV1Msg.OrgListMsg.orgVerificationInProcess()
             return Response(response_data, status=status.HTTP_200_OK)
         return response_400(BApiV1Msg.OrgListMsg.orgListFailed_NotFound())
+
+    def retrieve(self, request, *args, **kwargs):
+        org_emp = validateOrgEmpObj(user=request.user, org=kwargs['orgId'])
+        if org_emp != None:
+            serializer = BSrl.OrgInfoSerializer(org_emp.org)
+            return response_200(serializer.data)
+        return response_403(BApiV1Msg.businessOrgEmpSelfNotFound())

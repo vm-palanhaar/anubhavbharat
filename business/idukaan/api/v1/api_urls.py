@@ -9,5 +9,8 @@ urlpatterns = [
         'post': 'create',
         'get': 'list',
     })),
+    path('org/<str:orgId>', APIv1.OrgApi.as_view({
+        'get': 'retrieve',
+    })),
     #DEV
 ]

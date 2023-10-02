@@ -39,3 +39,13 @@ class OrgListSerializer(serializers.ModelSerializer):
         exclude = ['type','reg_no','doc','created_at','updated_at']
 
 
+class OrgInfoSerializer(serializers.ModelSerializer):
+    id = serializers.CharField()
+    type = serializers.CharField()
+    emp = serializers.SerializerMethodField()
+    class Meta:
+        model = BModel.Org
+        fields = ['id','name','type','emp']
+    
+    def get_emp(self, instance):
+        return BModel.OrgEmp.objects.filter(org=instance).count()
