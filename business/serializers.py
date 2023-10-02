@@ -5,9 +5,10 @@ from business import models as BModel
 
 
 class OrgTypesSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
     class Meta:
         model = BModel.OrgType
-        fields = ['entity','doc','desc']
+        fields = ['id','entity','doc','desc']
 
 
 class AddOrgSerializer(serializers.ModelSerializer):

@@ -74,6 +74,7 @@ class OrgApi(viewsets.ViewSet, PermissionRequiredMixin):
             orgs = []
             for org in queryset:
                 orgs.append(BSrl.OrgListSerializer(org.org).data)
-            response_data['orgList'] = orgs
+            response_data['org_list'] = orgs
+            response_data['is_verified_msg'] = BApiV1Msg.OrgListMsg.orgVerificationInProcess()
             return Response(response_data, status=status.HTTP_200_OK)
         return response_400(BApiV1Msg.OrgListMsg.orgListFailed_NotFound())

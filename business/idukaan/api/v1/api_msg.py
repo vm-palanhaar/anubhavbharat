@@ -1,13 +1,12 @@
 class AddOrgMsg:
     def addOrgSuccess():
-        return "\U0001F389 Congratulations \U0001F389\n"\
-        "Your organization has been successfully registered on the iDukaan platform. We've just sent a "\
-        "verification email to the registered email address of the organization to complete the process."\
+        return "Your organization has been successfully registered on the iDukaan platform. We've just sent a "\
+        "verification email to the registered email address of the organization to complete the process. "\
         "Please check you inbox and follow the instructions to get started with iDukaan."\
         "Thank you for choosing us as your partner!\n"\
         "If you have any questions or need assistance, feel free to contact our support team.\n"\
-        "Welcome to the iDukaan family! \U0001F680"
-    
+        "Welcome to the iDukaan family!"
+
     def addOrgFoundFailed():
         return {
             'error' : {
@@ -32,6 +31,10 @@ class OrgListMsg:
                         "If you need any assistance, feel free to contact our support team."
         }
     }
+
+    def orgVerificationInProcess():
+        return "Your organization's verification process is currently pending. Until verification is complete, certain features "\
+        "will remain disabled. To verify your organization, please refer to the Settings and Help section.\n"\
 
 
 def businessOrgNotVerified(orgName):
