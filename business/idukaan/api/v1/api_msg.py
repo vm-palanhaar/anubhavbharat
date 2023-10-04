@@ -37,19 +37,36 @@ class OrgListMsg:
         "will remain disabled. To verify your organization, please refer to the Settings and Help section.\n"\
 
 
-def businessOrgEmpSelfNotFound():
-    return {
-        'error' : {
-            'code' : 'businessSelfOrgEmpNotFound_iDukaan',
-            'message' : 'You are no longer associated with organization.'
-        }
-    }
-
-
-def businessOrgNotVerified(orgName):
+def businessOrgNotVerified(org):
     return {
         'error' : {
             'code' : 'bussinessOrgNotVerified_iDukaan',
-            'message' : f'Verficiation in-progess for {orgName}. Please check your registered mail for verification process.'
+            'message' : f'Verficiation in-progess for {org.name}. Please check your registered mail for verification process.'
         }
     }
+
+
+class OrgEmpMsg:
+    def businessOrgEmpFound(emp): 
+        return {
+            'error' : {
+                'code' : 'businessOrgEmpFound_iDukaan',
+                'message' : f'{emp.user.first_name} {emp.user.last_name} is already associated with {emp.org.name}'
+            }
+        }
+    
+    def businessOrgEmpNotMng(org):
+        return {
+            'error' : {
+                'code' : 'bussinessOrgEmpNotManager_iDukaan',
+                'message' : f'You are not authorized to add/update/view specific resources in {org.name}!'
+            }
+        }
+    
+    def businessOrgEmpSelfNotFound():
+        return {
+            'error' : {
+                'code' : 'businessSelfOrgEmpNotFound_iDukaan',
+                'message' : 'You are no longer associated with organization.'
+            }
+        }

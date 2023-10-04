@@ -49,3 +49,20 @@ class OrgInfoSerializer(serializers.ModelSerializer):
     
     def get_emp(self, instance):
         return BModel.OrgEmp.objects.filter(org=instance).count()
+
+
+class AddOrgEmpSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(required=False, read_only=True)
+    user = serializers.CharField()
+    class Meta:
+        model = BModel.OrgEmp
+        exclude = ['created_at','updated_at','is_delete']
+
+    def create(self, validated_data):
+        org_emp = BModel.OrgEmp.objects.create(
+            org = validated_data['org'],
+            user = self.context.get('user'),
+            is_manager = validated_data['is_manager']
+        )
+        org_emp.save
+        return org_emp

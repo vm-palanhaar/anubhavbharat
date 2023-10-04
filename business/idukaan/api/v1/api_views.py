@@ -6,6 +6,8 @@ from rest_framework.permissions import IsAuthenticated
 
 from knox.auth import TokenAuthentication
 
+from tourism import api_errors as TErr
+
 from business import models as BMdl
 from business import serializers as BSrl
 from business import permissions as BPerm
@@ -14,6 +16,7 @@ from business.idukaan.api.v1 import api_msg as BApiV1Msg
 from users import models as UserMdl
 from users import serializers as UserSrl
 from users import permissions as UserPerm
+from users.common.api.v1 import api_msg as UserApiV1Msg
 
 
 '''
@@ -30,6 +33,10 @@ def validateOrgEmpObj(user, org):
             return BMdl.OrgEmp.objects.get(user=user, org=org)
         except BMdl.OrgEmp.DoesNotExist:
             return None
+        
+def validateOrgObj(org):
+    return org.is_active and org.is_verified
+        
 
 def response_200(response_data):
     return Response(response_data, status=status.HTTP_200_OK)
@@ -69,7 +76,7 @@ class OrgApi(viewsets.ViewSet, PermissionRequiredMixin):
             response_data['org'] = serializer.data
             response_data['message'] = BApiV1Msg.AddOrgMsg.addOrgSuccess()
             return response_201(response_data)
-        if serializer.errors['reg_no'][0].code == 'unique':
+        if 'reg_no' in serializer.errors and serializer.errors['reg_no'][0].code == 'unique':
             return response_409(BApiV1Msg.AddOrgMsg.addOrgFoundFailed())
         return response_400(serializer.errors)
     
@@ -91,3 +98,59 @@ class OrgApi(viewsets.ViewSet, PermissionRequiredMixin):
             serializer = BSrl.OrgInfoSerializer(org_emp.org)
             return response_200(serializer.data)
         return response_403(BApiV1Msg.businessOrgEmpSelfNotFound())
+
+
+class OrgEmpApi(viewsets.ViewSet, PermissionRequiredMixin):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated, UserPerm.IsVerified]
+
+    def create(self, request, *args, **kwargs):
+        response_data = {}
+        response_data['org_id'] = kwargs['orgId']
+        # validate org_id from URI and request body
+        if kwargs['orgId'] == request.data['org']:
+            org_emp = validateOrgEmpObj(user=request.user, org=kwargs['orgId'])
+            # org is active and verified & employee is manager of the org
+            if org_emp != None and validateOrgObj(org=org_emp.org) and org_emp.is_manager:
+                # check the requested user exists in users profile
+                try:
+                    user = UserMdl.User.objects.get(username = request.data['user'])
+                except UserMdl.User.DoesNotExist:
+                    response_data.update(UserApiV1Msg.usernameUserNotFound())
+                    return response_400(response_data)
+                if user.is_active == False and user.is_verified == False:
+                    response_data.update(UserApiV1Msg.userInActiveNotVerified(user = user))
+                    return response_400(response_data)
+                elif user.is_verified == False:
+                    response_data.update(UserApiV1Msg.userNotVerified(user = user))
+                    return response_400(response_data)
+                elif user.is_active == False:
+                    response_data.update(UserApiV1Msg.userInActive(user = user))
+                    return response_400(response_data)
+                # check the requested user already associated with org
+                try:
+                    emp = BMdl.OrgEmp.objects.get(user=user,org=request.data['org'])
+                    response_data.update(BApiV1Msg.OrgEmpMsg.businessOrgEmpFound(emp))
+                    return response_409(response_data)
+                except BMdl.OrgEmp.DoesNotExist:
+                    pass
+                serializer = BSrl.AddOrgEmpSerializer(data=request.data, context={'user': user})
+                if serializer.is_valid():
+                    serializer.save()
+                    response_data['org_emp'] = serializer.data
+                    return response_201(response_data)
+                return response_400(serializer.errors)
+            # org is active and verified & employee is not manager of the org
+            if org_emp != None and org_emp.is_manager == False:
+                response_data.update(BApiV1Msg.OrgEmpMsg.businessOrgEmpNotMng(org = org_emp.org))
+                return response_403(response_data)
+            # org is active and not verified
+            if org_emp != None and org_emp.org.is_verified == False:
+                response_data.update(BApiV1Msg.businessOrgNotVerified(org = org_emp.org))
+                return response_403(response_data)
+            # employee is not part of organization
+            response_data.update(BApiV1Msg.OrgEmpMsg.businessOrgEmpSelfNotFound())
+            return response_403(response_data)
+        response_data.update(TErr.badActionUser(request = request, \
+                reason = 'orgEmpCreate?orgId_url={0}&body={1}'.format(kwargs['orgId'], request.data['org'])))
+        return response_403(response_data)

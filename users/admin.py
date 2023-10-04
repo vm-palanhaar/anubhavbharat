@@ -15,7 +15,7 @@ class UserConfig(UserAdmin):
         ('Personal Info', {'fields': ('first_name','last_name')}),
         ('Contact Info', {'fields': ('contact_no','email')}),
         ('Credentials', {'fields':('username','password')}),
-        ('Status',{'fields':('is_active','is_verified','last_login','is_staff','is_superuser')}),
+        ('Status',{'fields':('msg','is_active','is_verified','last_login','is_staff','is_superuser')}),
     )
 
     add_fieldsets = (

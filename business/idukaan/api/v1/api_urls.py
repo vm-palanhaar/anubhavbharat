@@ -13,4 +13,7 @@ urlpatterns = [
         'get': 'retrieve',
     })),
     #DEV
+    path('org/<str:orgId>/emp', APIv1.OrgEmpApi.as_view({
+        'post': 'create',
+    })),
 ]
