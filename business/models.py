@@ -40,7 +40,6 @@ class OrgEmp(TimestampModel):
     org = models.ForeignKey(Org, on_delete=models.CASCADE, verbose_name='Organization')
     user = models.ForeignKey(UserModel.User, on_delete=models.CASCADE, verbose_name='User')
     is_manager = models.BooleanField(default=False, verbose_name='Manager')
-    is_delete = models.BooleanField(default=False, verbose_name='Delete')
 
     def __str__(self):
         return f'{self.user.first_name} {self.user.last_name}'

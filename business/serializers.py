@@ -3,6 +3,8 @@ from rest_framework.validators import UniqueValidator
 
 from business import models as BModel
 
+from users import models as UserMdl
+
 
 class OrgTypesSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
@@ -56,7 +58,7 @@ class AddOrgEmpSerializer(serializers.ModelSerializer):
     user = serializers.CharField()
     class Meta:
         model = BModel.OrgEmp
-        exclude = ['created_at','updated_at','is_delete']
+        exclude = ['created_at','updated_at']
 
     def create(self, validated_data):
         org_emp = BModel.OrgEmp.objects.create(
@@ -66,3 +68,16 @@ class AddOrgEmpSerializer(serializers.ModelSerializer):
         )
         org_emp.save
         return org_emp
+
+
+class OrgEmpListSerializer(serializers.ModelSerializer):
+    id = serializers.CharField()
+    name = serializers.SerializerMethodField()
+    class Meta:
+        model = BModel.OrgEmp
+        exclude = ['user','org','created_at','updated_at']
+
+    def get_name(self, instance):
+        user = UserMdl.User.objects.get(username=instance.user)
+        return f'{user.first_name} {user.last_name}'
+     

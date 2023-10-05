@@ -138,6 +138,7 @@ class OrgEmpApi(viewsets.ViewSet, PermissionRequiredMixin):
                 if serializer.is_valid():
                     serializer.save()
                     response_data['org_emp'] = serializer.data
+                    response_data['message'] = 'Success'
                     return response_201(response_data)
                 return response_400(serializer.errors)
             # org is active and verified & employee is not manager of the org
@@ -153,4 +154,17 @@ class OrgEmpApi(viewsets.ViewSet, PermissionRequiredMixin):
             return response_403(response_data)
         response_data.update(TErr.badActionUser(request = request, \
                 reason = 'orgEmpCreate?orgId_url={0}&body={1}'.format(kwargs['orgId'], request.data['org'])))
+        return response_403(response_data)
+    
+    def list(self, request, *args, **kwargs):
+        response_data = {}
+        response_data['orgId'] = kwargs['orgId']
+        org_emp = validateOrgEmpObj(request.user, kwargs['orgId'])
+        if org_emp != None:
+            employees = BMdl.OrgEmp.objects.filter(org=kwargs['orgId'])
+            serializer = BSrl.OrgEmpListSerializer(employees, many=True)
+            response_data['org_name'] = org_emp.org.name
+            response_data['org_emp_list'] = serializer.data
+            return Response(response_data, status=status.HTTP_200_OK)
+        response_data.update(BApiV1Msg.OrgEmpMsg.businessOrgEmpSelfNotFound())
         return response_403(response_data)
