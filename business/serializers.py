@@ -64,6 +64,7 @@ class AddOrgEmpSerializer(serializers.ModelSerializer):
         org_emp = BModel.OrgEmp.objects.create(
             org = validated_data['org'],
             user = self.context.get('user'),
+            join_date = validated_data['join_date'],
             is_manager = validated_data['is_manager']
         )
         org_emp.save

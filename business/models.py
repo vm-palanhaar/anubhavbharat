@@ -39,6 +39,7 @@ class Org(TimestampModel):
 class OrgEmp(TimestampModel):
     org = models.ForeignKey(Org, on_delete=models.CASCADE, verbose_name='Organization')
     user = models.ForeignKey(UserModel.User, on_delete=models.CASCADE, verbose_name='User')
+    join_date = models.DateField(verbose_name='Joining Date')
     is_manager = models.BooleanField(default=False, verbose_name='Manager')
 
     def __str__(self):

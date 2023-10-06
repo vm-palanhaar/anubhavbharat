@@ -137,8 +137,9 @@ class OrgEmpApi(viewsets.ViewSet, PermissionRequiredMixin):
                 serializer = BSrl.AddOrgEmpSerializer(data=request.data, context={'user': user})
                 if serializer.is_valid():
                     serializer.save()
+                    new_org_emp = serializer.data
                     response_data['org_emp'] = serializer.data
-                    response_data['message'] = 'Success'
+                    response_data['message'] = BApiV1Msg.OrgEmpMsg.businessOrgEmpAddSuccess(emp_user = user)
                     return response_201(response_data)
                 return response_400(serializer.errors)
             # org is active and verified & employee is not manager of the org

@@ -70,3 +70,7 @@ class OrgEmpMsg:
                 'message' : 'You are no longer associated with organization.'
             }
         }
+    
+    def businessOrgEmpAddSuccess(emp_user):
+        return f"Good news! {emp_user.first_name} {emp_user.last_name} has been successfully onboarded and is now part of our team. "\
+        "Please extend a warm welcome and provide any necessary guidance as they begin their journey with us."
