@@ -35,6 +35,8 @@ class User(AbstractBaseUser, TimestampModel, PermissionsMixin):
     is_verified = models.BooleanField(default=False, verbose_name='Identity Verified')
     is_staff = models.BooleanField(default=False, verbose_name='Team Member')
     is_superuser = models.BooleanField(default=False, verbose_name='Administrator')
+    # blocked reason is_active=false
+    msg = models.TextField(blank=True, null=True, verbose_name="Account blocked (reason)")
 
     objects = UserAccountManager()
 

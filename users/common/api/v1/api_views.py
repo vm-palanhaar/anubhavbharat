@@ -73,15 +73,18 @@ class UserLoginApi(generics.GenericAPIView):
                     response_data['message'] = UserApiV1Msg.UserLoginMsg.userLoginFailed_UserCredInvalid()
                     return response_400(response_data)
                 if user.is_active != True:
-                    #TODO: Send email verification to user
+                    #TODO: Send email verification to user with identify verification
                     response_data['message'] = UserApiV1Msg.UserLoginMsg.userLoginFailed_UserInActive()
                     return response_403(response_data)
             else:
+                if user.is_verified != True:
+                    #TODO: Send email instructions to user for identity verification
+                    response_data['message'] = UserApiV1Msg.UserLoginMsg.userLoginSuccess_UserInVerfieid()
+                    return response_403(response_data)
                 login(request, user)
                 response_data['user'] = serializer.data
                 response_data['token'] = AuthToken.objects.create(user)[1]
-                response_data['message'] = UserApiV1Msg.UserLoginMsg.userLoginSuccess() if user.is_verified \
-                    else UserApiV1Msg.UserLoginMsg.userLoginSuccess_UserInVerfieid()
+                response_data['message'] = UserApiV1Msg.UserLoginMsg.userLoginSuccess()
                 return response_201(response_data)
         response_data = serializer.errors
         response_data['message'] = UserApiV1Msg.UserLoginMsg.userLoginFailed_UserCredInvalid()

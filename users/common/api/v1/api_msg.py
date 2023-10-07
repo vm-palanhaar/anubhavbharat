@@ -18,4 +18,36 @@ class UserLoginMsg:
         " Please verify your identity to access all features of the app."
     
     def userLoginSuccess():
-        return "Loading your business diary..."
+        return "Loading your diary..."
+
+def usernameUserNotFound(): 
+    return {
+        'error' : {
+            'code' : 'usernameUserNotFound',
+            'message' : 'The username you entered does not match any existing user profiles'
+        }
+    }
+
+def userInActiveNotVerified(user):
+    return {
+        'error' : {
+            'code' : 'userInActiveNotVerified',
+            'message' : f"{user.first_name}'s account is not yet active, and not yet verified the identity."
+        }
+    }
+
+def userNotVerified(user):
+    return {
+        'error' : {
+            'code' : 'userNotVerified',
+            'message' : f"{user.first_name}'s account have not yet verified the identity."
+        }
+    }
+
+def userInActive(user):
+    return {
+        'error' : {
+            'code' : 'userInActive',
+            'message' : f"{user.first_name}'s account is blocked."
+        }
+    }

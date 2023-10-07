@@ -2,6 +2,7 @@ import os
 
 from pathlib import Path
 from dotenv import load_dotenv
+from google.oauth2 import service_account
 
 load_dotenv()
 
@@ -25,6 +26,7 @@ INSTALLED_APPS = [
     'knox',
     # django apps
     'users',
+    'business',
 ]
 
 AUTH_USER_MODEL = 'users.User'
@@ -116,3 +118,19 @@ REST_KNOX = {
     #'TOKEN_LIMIT_PER_USER': None,
     #'AUTO_REFRESH': False,
 }
+
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
+        "OPTIONS": {},
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
+
+GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
+    os.path.join(BASE_DIR, os.getenv('GC_CRED')))
+GS_BUCKET_NAME = os.getenv('GCS_BUCKET_NAME')
+MEDIA_URL = 'https://storage.googleapis.com/{}/'.format(GS_BUCKET_NAME)
+GS_FILE_OVERWRITE = True
