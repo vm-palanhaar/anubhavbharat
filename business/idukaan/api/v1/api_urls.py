@@ -17,4 +17,8 @@ urlpatterns = [
         'post': 'create',
         'get': 'list',
     })),
+    path('org/<str:orgId>/emp/<str:orgEmpId>', APIv1.OrgEmpApi.as_view({
+        'patch': 'partial_update',
+        'delete': 'destroy',
+    })),
 ]

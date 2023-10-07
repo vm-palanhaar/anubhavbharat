@@ -74,3 +74,25 @@ class OrgEmpMsg:
     def businessOrgEmpAddSuccess(emp_user):
         return f"Good news! {emp_user.first_name} {emp_user.last_name} has been successfully onboarded and is now part of our team. "\
         "Please extend a warm welcome and provide any necessary guidance as they begin their journey with us."
+    
+    def businessOrgEmpNotFound(org):
+        return {
+            'error' : {
+                'code' : 'businessOrgEmpNotFound_iDukaan',
+                'message' : f'User is no longer associated with {org.name}. Please refresh to update employees list.'
+            }
+        }
+    
+    def businessOrgEmpSelfUd(org):
+        return {
+            'error' : {
+                'code' : 'businessOrgEmpSelfUd_iDukaan',
+                'message' : f'You are not allowed to update or terminate yourself from {org.name}!'
+            }
+        }
+    
+    def businessOrgEmpUpdateSuccess(emp_user):
+        return f"{emp_user.first_name} {emp_user.last_name} profile has been successfully updated."
+    
+    def businessOrgEmpDeleteSuccess(emp_user):
+        return f"{emp_user.user.first_name} {emp_user.user.last_name} has been terminated from {emp_user.org.name}."
