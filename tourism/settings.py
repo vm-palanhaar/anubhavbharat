@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     # django apps
     'users',
     'business',
+    'indrail',
 ]
 
 AUTH_USER_MODEL = 'users.User'
