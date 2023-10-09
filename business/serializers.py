@@ -30,6 +30,7 @@ class AddOrgSerializer(serializers.ModelSerializer):
         org_emp = BModel.OrgEmp.objects.create(
             org = org,
             user = self.context.get('user'),
+            join_date = datetime.now().date(),
             is_manager = True
         )
         org_emp.save

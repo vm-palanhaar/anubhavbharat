@@ -52,7 +52,7 @@ class Shop(TimestampModel):
     contact_no = models.CharField(max_length=15, verbose_name='Contact No.')
     # location
     station = models.ForeignKey(Station, on_delete=models.CASCADE, verbose_name='Railway Station')
-    lat = models.CharField(max_length=30, verbose_name='Latitdue')
+    lat = models.CharField(max_length=30, verbose_name='Latitude')
     lon = models.CharField(max_length=30, verbose_name='Longitude')
     plt1 = models.CharField(max_length=10, blank=True, null=True, verbose_name='Primary Platform')
     plt2 = models.CharField(max_length=10, blank=True, null=True, verbose_name='Secondary Platform')

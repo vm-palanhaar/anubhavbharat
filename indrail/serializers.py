@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from rest_framework import serializers
 from datetime import date
 
@@ -24,6 +26,7 @@ class RailStationListSrl(serializers.ModelSerializer):
 
 class AddShop_iDukaanSrl(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
+    org = serializers.CharField()
     img = serializers.ImageField(write_only=True)
     contact_no = serializers.CharField(write_only=True)
     # station
@@ -49,8 +52,9 @@ class AddShop_iDukaanSrl(serializers.ModelSerializer):
         is_active = today_date < validated_data['lic_ed']
 
         shop = IRMdl.Shop.objects.create(
-            org = validated_data['org'],
+            org = self.context.get('org'),
             name = validated_data['name'],
+            shop_no = validated_data['shop_no'],
             img = validated_data['img'],
             contact_no = validated_data['contact_no'],
             # station
@@ -80,6 +84,7 @@ class AddShop_iDukaanSrl(serializers.ModelSerializer):
         shop_emp = IRMdl.ShopEmp.objects.create(
             shop = shop,
             user = self.context.get('user'),
+            join_date = datetime.now().date(),
             is_manager = True
         )
         shop_emp.save()

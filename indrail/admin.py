@@ -59,7 +59,7 @@ class ShopEmpAdmin(admin.TabularInline):
 @admin.register(IRMdl.Shop)
 class ShopConfig(admin.ModelAdmin):
     fieldsets = (
-        ('SHOP', {'fields':('org','name','shop_no','image','contact_no')}),
+        ('SHOP', {'fields':('org','name','shop_no','img','contact_no')}),
         ('INDIAN RAILWAYS', {'fields':('station','plt1','plt2','lat','lon')}),
         ('PAYMENT', {'fields':('is_cash','is_card','is_upi')}),
         ('STATUS', {'fields':('is_open','is_active','is_verified')}),

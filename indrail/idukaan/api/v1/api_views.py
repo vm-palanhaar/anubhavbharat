@@ -14,6 +14,7 @@ from indrail.idukaan.api.v1 import api_msg as IrApiV1Msg
 
 from business import models as BMdl
 from business.idukaan.api.v1 import api_msg as BApiV1Msg
+from business.idukaan.api.v1 import api_srv as BApiV1Srv
 
 from users import models as UserMdl
 from users import permissions as UserPerm
@@ -21,6 +22,7 @@ from users.common.api.v1 import api_msg as UserApiV1Msg
 
 '''
 PROD
+1. ShopApi
 DEV
 '''
 
@@ -51,8 +53,37 @@ class ShopApi(viewsets.ViewSet, PermissionRequiredMixin):
         response_data = {}
         response_data['org_id'] = kwargs['orgId']
         if kwargs['orgId'] == str(request.data['org']):
-            pass
-        pass
+            org_emp = BApiV1Srv.ValidateOrgEmpObj(user=request.user, org=kwargs['orgId'])
+            # org is active and verified & employee is manager of the org
+            if org_emp != None and BApiV1Srv.ValidateOrgObj(org=org_emp.org) and org_emp.is_manager:
+                # check the shop license no exists in ShopLic
+                try:
+                    IrMdl.ShopLic.objects.get(reg_no = request.data['lic_no'])
+                    return response_409(IrApiV1Msg.AddShopMsg.addShopFoundFailed())
+                except IrMdl.ShopLic.DoesNotExist:
+                    pass
+                serializer = IrSrl.AddShop_iDukaanSrl(data = request.data, context={
+                            'user':request.user, 'org' : org_emp.org})
+                if serializer.is_valid():
+                    serializer.save()
+                    response_data['ir_shop'] = serializer.data
+                    response_data['message'] = IrApiV1Msg.AddShopMsg.addShopSuccess()
+                    return response_201(response_data)
+                return response_400(serializer.errors)
+            # org is active and verified & employee is not manager of the org
+            if org_emp != None and org_emp.is_manager == False:
+                response_data.update(BApiV1Msg.OrgEmpMsg.businessOrgEmpNotMng(org = org_emp.org))
+                return response_403(response_data)
+            # org is active and not verified
+            if org_emp != None and org_emp.org.is_verified == False:
+                response_data.update(BApiV1Msg.businessOrgNotVerified(org = org_emp.org))
+                return response_403(response_data)
+            # employee is not part of organization
+            response_data.update(BApiV1Msg.OrgEmpMsg.businessOrgEmpSelfNotFound())
+            return response_403(response_data)
+        response_data.update(TErr.badActionUser(request = request, \
+                reason = 'irShopCreate?orgId_url={0}&body={1}'.format(kwargs['orgId'], request.data['org'])))
+        return response_403(response_data) 
 
     def list(self, request, *args, **kwargs):
         pass
