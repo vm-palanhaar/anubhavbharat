@@ -103,3 +103,9 @@ class OrgShopList_iDukaanSrl(serializers.ModelSerializer):
         
     def get_org(self, instance):
         return str(instance.org.id)
+
+
+class UpdateShop_iDukaanSrl(serializers.ModelSerializer):
+    class Meta:
+        model = IRMdl.Shop
+        fields = ['id','contact_no','is_open','is_cash','is_card','is_upi']

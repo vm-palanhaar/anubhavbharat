@@ -11,6 +11,7 @@ from tourism import api_errors as TErr
 from indrail import models as IrMdl
 from indrail import serializers as IrSrl
 from indrail.idukaan.api.v1 import api_msg as IrApiV1Msg
+from indrail.idukaan.api.v1 import api_srv as IrApiV1Srv
 
 from business import models as BMdl
 from business.idukaan.api.v1 import api_msg as BApiV1Msg
@@ -116,4 +117,9 @@ class ShopApi(viewsets.ViewSet, PermissionRequiredMixin):
         return response_403(response_data)
 
     def partial_update(self, request, *args, **kwargs):
-        pass
+        response_data = {}
+        response_data['id'] = kwargs['shopId']
+        if kwargs['shopId'] == str(request.data['id']):
+            org_shop_emp = IrApiV1Srv.ValidateOrgShopEmp(user=request.user, shop=kwargs['shopId'], org=kwargs['orgId'])
+            if org_shop_emp != None:
+                pass
