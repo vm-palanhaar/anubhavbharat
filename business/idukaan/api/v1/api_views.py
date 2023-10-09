@@ -12,6 +12,7 @@ from business import models as BMdl
 from business import serializers as BSrl
 from business import permissions as BPerm
 from business.idukaan.api.v1 import api_msg as BApiV1Msg
+from business.idukaan.api.v1 import api_srv as BApiV1Srv
 
 from users import models as UserMdl
 from users import serializers as UserSrl
@@ -24,19 +25,9 @@ PROD
 1. OrgTypesApi
 2. OrgApi
 3. OrgEmpApi
-4. OrgStateGstApi
 DEV
 '''
 
-def validateOrgEmpObj(user, org):
-        try:
-            return BMdl.OrgEmp.objects.get(user=user, org=org)
-        except BMdl.OrgEmp.DoesNotExist:
-            return None
-        
-def validateOrgObj(org):
-    return org.is_active and org.is_verified
-        
 
 def response_200(response_data):
     return Response(response_data, status=status.HTTP_200_OK)
@@ -95,7 +86,7 @@ class OrgApi(viewsets.ViewSet, PermissionRequiredMixin):
         return response_400(BApiV1Msg.OrgListMsg.orgListFailed_NotFound())
 
     def retrieve(self, request, *args, **kwargs):
-        org_emp = validateOrgEmpObj(user=request.user, org=kwargs['orgId'])
+        org_emp = BApiV1Srv.ValidateOrgEmpObj(user=request.user, org=kwargs['orgId'])
         if org_emp != None:
             serializer = BSrl.OrgInfoSerializer(org_emp.org)
             return response_200(serializer.data)
@@ -111,9 +102,9 @@ class OrgEmpApi(viewsets.ViewSet, PermissionRequiredMixin):
         response_data['org_id'] = kwargs['orgId']
         # validate org_id from URI and request body
         if kwargs['orgId'] == request.data['org']:
-            org_emp = validateOrgEmpObj(user=request.user, org=kwargs['orgId'])
+            org_emp = BApiV1Srv.ValidateOrgEmpObj(user=request.user, org=kwargs['orgId'])
             # org is active and verified & employee is manager of the org
-            if org_emp != None and validateOrgObj(org=org_emp.org) and org_emp.is_manager:
+            if org_emp != None and BApiV1Srv.ValidateOrgObj(org=org_emp.org) and org_emp.is_manager:
                 # check the requested user exists in users profile
                 try:
                     user = UserMdl.User.objects.get(username = request.data['user'])
@@ -162,7 +153,7 @@ class OrgEmpApi(viewsets.ViewSet, PermissionRequiredMixin):
     def list(self, request, *args, **kwargs):
         response_data = {}
         response_data['org_id'] = kwargs['orgId']
-        org_emp = validateOrgEmpObj(user=request.user, org=kwargs['orgId'])
+        org_emp = BApiV1Srv.ValidateOrgEmpObj(user=request.user, org=kwargs['orgId'])
         if org_emp != None:
             employees = BMdl.OrgEmp.objects.filter(org=kwargs['orgId'])
             serializer = BSrl.OrgEmpListSerializer(employees, many=True)
@@ -177,9 +168,9 @@ class OrgEmpApi(viewsets.ViewSet, PermissionRequiredMixin):
         response_data['org_id'] = kwargs['orgId']
         # validate id from URI and request body
         if kwargs['orgEmpId'] == request.data['id']:
-            org_emp = validateOrgEmpObj(user=request.user, org=kwargs['orgId'])
+            org_emp = BApiV1Srv.ValidateOrgEmpObj(user=request.user, org=kwargs['orgId'])
             # org is active and verified & employee is manager of the org
-            if org_emp != None and validateOrgObj(org=org_emp.org) and org_emp.is_manager:
+            if org_emp != None and BApiV1Srv.ValidateOrgObj(org=org_emp.org) and org_emp.is_manager:
                 try:
                     req_emp = BMdl.OrgEmp.objects.get(id = request.data['id'])
                 except BMdl.OrgEmp.DoesNotExist:
@@ -217,9 +208,9 @@ class OrgEmpApi(viewsets.ViewSet, PermissionRequiredMixin):
         response_data['org_id'] = kwargs['orgId']
         # validate id from URI and request body
         if kwargs['orgEmpId'] == request.data['id']:
-            org_emp = validateOrgEmpObj(user=request.user, org=kwargs['orgId'])
+            org_emp = BApiV1Srv.ValidateOrgEmpObj(user=request.user, org=kwargs['orgId'])
             # org is active and verified & employee is manager of the org
-            if org_emp != None and validateOrgObj(org=org_emp.org) and org_emp.is_manager:
+            if org_emp != None and BApiV1Srv.ValidateOrgObj(org=org_emp.org) and org_emp.is_manager:
                 try:
                     req_emp = BMdl.OrgEmp.objects.get(id = request.data['id'])
                 except BMdl.OrgEmp.DoesNotExist:

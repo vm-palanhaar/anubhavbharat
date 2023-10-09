@@ -4,6 +4,12 @@ from rest_framework.response import Response
 from indrail import models as IrMdl
 from indrail import serializers as IrSrl
 
+'''
+PROD
+1. RailStationListApi
+DEV
+'''
+
 
 def response_200(response_data):
     return Response(response_data, status=status.HTTP_200_OK)
