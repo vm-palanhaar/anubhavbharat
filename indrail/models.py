@@ -7,33 +7,34 @@ from business import models as BMdl
 from users import models as UMdl
 
 
-class RailZone(models.Model):
+class Zone(models.Model):
     code = models.CharField(max_length=5, primary_key=True, verbose_name='Zone Code')
     name = models.CharField(max_length=90, verbose_name='Zone Name')
     def __str__(self):
         return self.name()
 
 
-class RailDiv(models.Model):
-    zone = models.ForeignKey(RailZone, on_delete=models.CASCADE, verbose_name='Railway Zone')
+class Div(models.Model):
+    zone = models.ForeignKey(Zone, on_delete=models.CASCADE, verbose_name='Railway Zone')
     code = models.CharField(max_length=5, primary_key=True, verbose_name='Division Code')
     name = models.CharField(max_length=60, verbose_name='Division Name')
     def __str__(self):
         return f'{self.name} - {self.zone.name}'
     
 
-class RailStationCat(models.Model):
+class StationCat(models.Model):
     cat = models.CharField(max_length=6, primary_key=True, verbose_name='Station Category')
     def __str__(self):
         return self.cat
     
 
-class RailStation(models.Model):
-    zone = models.ForeignKey(RailZone, blank=True, null=True, on_delete=models.CASCADE, verbose_name='Railway Zone')
-    div = models.ForeignKey(RailDiv, blank=True, null=True, on_delete=models.CASCADE, verbose_name='Railway Division')
+class Station(models.Model):
+    zone = models.ForeignKey(Zone, blank=True, null=True, on_delete=models.CASCADE, verbose_name='Railway Zone')
+    div = models.ForeignKey(Div, blank=True, null=True, on_delete=models.CASCADE, verbose_name='Railway Division')
     code = models.CharField(max_length=10, primary_key=True, verbose_name='Station Code')
     name = models.CharField(max_length=100, verbose_name='Station Name')
     plt = models.IntegerField(blank=True, null=True, verbose_name='No. of Platforms')
+    cat = models.ForeignKey(StationCat, blank=True, null=True, on_delete=models.CASCADE, verbose_name='Station Category')
     def __str__(self):
         return f'{self.name} - {self.code}'
     
@@ -50,7 +51,7 @@ class Shop(TimestampModel):
             validators=[FileExtensionValidator(allowed_extensions=["png","jpeg"])])
     contact_no = models.CharField(max_length=15, verbose_name='Contact No.')
     # location
-    station = models.ForeignKey(RailStation, on_delete=models.CASCADE, verbose_name='Railway Station')
+    station = models.ForeignKey(Station, on_delete=models.CASCADE, verbose_name='Railway Station')
     lat = models.CharField(max_length=30, verbose_name='Latitdue')
     lon = models.CharField(max_length=30, verbose_name='Longitude')
     plt1 = models.CharField(max_length=10, blank=True, null=True, verbose_name='Primary Platform')
@@ -69,7 +70,7 @@ class Shop(TimestampModel):
         return f'{self.name}, {self.station.name} ({self.station.code})'
 
 
-class OrgShopEmp(TimestampModel):
+class ShopEmp(TimestampModel):
     shop = models.ForeignKey(Shop, on_delete=models.CASCADE, verbose_name='Shop')
     user = models.ForeignKey(UMdl.User, on_delete=models.CASCADE, verbose_name='User')
     join_date = models.DateField(verbose_name='Joining Date')
