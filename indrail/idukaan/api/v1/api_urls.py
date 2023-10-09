@@ -10,6 +10,9 @@ urlpatterns = [
                 'post': 'create',
                 'get': 'list',
             })),
+            path('shop/<str:shopId>', APIv1.ShopApi.as_view({
+                'patch': 'partial_update',
+            })),
             #DEV
         ])),
         #DEV

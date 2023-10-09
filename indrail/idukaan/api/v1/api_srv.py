@@ -12,7 +12,7 @@ def ValidateOrgShopEmp(user, shop, org):
     if org_emp != None and org_emp.is_manager == True:
         try:
             return {
-                'shop' : IrMdl.Shop.objects.get(id = shop),
+                'shop' : IrMdl.Shop.objects.get(id = shop, org = org),
                 'emp' : org_emp,
                 'isMng' : org_emp.is_manager
             }
@@ -30,7 +30,7 @@ def ValidateOrgShopEmp(user, shop, org):
                 'emp' : shop_emp,
                 'isMng' : shop_emp.is_manager
             }
-        except IrMdl.Shop.DoesNotExist:
+        except IrMdl.ShopEmp.DoesNotExist:
             return {
                 'shop' : None,
                 'emp' : org_emp,

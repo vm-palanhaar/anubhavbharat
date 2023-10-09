@@ -26,3 +26,36 @@ class ShopList:
             } 
         }
     
+    def irOrgShopListEmptyMng():
+        return {
+            'error' : {
+                'code' : 'irOrgShopListEmptyMng_iDukaan',
+                'message' : 'Shops/Stalls at railway station premises are not registered on iDukaan.'
+            } 
+        }
+    
+    def irOrgShopNotFound():
+        return {
+            'error' : {
+                'code' : 'irOrgShopNotFound_iDukaan',
+                'message' : 'This shop/stall had been deleted from iDukaan.'
+            }
+        }
+    
+
+class ShopEmpMsg:
+    def irOrgShopEmpNotMng(shop):
+        return {
+            'error' : {
+                'code' : 'irOrgShopEmpNotManager_iDukaan',
+                'message' : f'You are not authorized to add/update/view specific resources in {shop.name}!'
+            }
+        }
+    
+    def irOrgShopEmpSelfNotFound():
+        return {
+            'error' : {
+                'code' : 'irOrgShopEmpSelfNotFound_iDukaan',
+                'message' : 'You are no longer associated with shop/stall.'
+            }
+        }

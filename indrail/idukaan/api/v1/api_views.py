@@ -121,5 +121,22 @@ class ShopApi(viewsets.ViewSet, PermissionRequiredMixin):
         response_data['id'] = kwargs['shopId']
         if kwargs['shopId'] == str(request.data['id']):
             org_shop_emp = IrApiV1Srv.ValidateOrgShopEmp(user=request.user, shop=kwargs['shopId'], org=kwargs['orgId'])
-            if org_shop_emp != None:
-                pass
+            # only manager from org or shop are allowed to update
+            if org_shop_emp != None and org_shop_emp['shop'] != None:
+                if org_shop_emp['isMng'] == True:
+                    serializer = IrSrl.UpdateShop_iDukaanSrl(org_shop_emp['shop'], data=request.data, partial=True)
+                    if serializer.is_valid():
+                        serializer.save()
+                        return response_200(response_data)
+                    return response_400(serializer.errors)
+                response_data.update(IrApiV1Msg.ShopEmpMsg.irOrgShopEmpNotMng(shop=org_shop_emp['shop']))
+                return response_400(response_data)
+            if org_shop_emp != None and org_shop_emp['shop'] == None:
+                if org_shop_emp['isMng'] == True:
+                    response_data.update(IrApiV1Msg.ShopList.irOrgShopNotFound())
+                    return response_400(response_data)
+                response_data.update(IrApiV1Msg.ShopEmpMsg.irOrgShopEmpSelfNotFound())
+                return response_400(response_data)
+        response_data.update(TErr.badActionUser(request = request, \
+                reason = 'irShopPartialUpdate?shopId_url={0}&body={1}'.format(kwargs['shopId'], request.data['id'])))
+        return response_403(response_data)

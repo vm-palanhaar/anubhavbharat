@@ -64,5 +64,5 @@ class ShopConfig(admin.ModelAdmin):
         ('PAYMENT', {'fields':('is_cash','is_card','is_upi')}),
         ('STATUS', {'fields':('is_open','is_active','is_verified')}),
     )
-    raw_id_fields = ['station']
+    raw_id_fields = ['org','station']
     inlines = [ShopLicAdmin,ShopEmpAdmin]
