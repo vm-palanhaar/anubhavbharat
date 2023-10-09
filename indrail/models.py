@@ -48,7 +48,7 @@ class Shop(TimestampModel):
     name = models.CharField(max_length=60, verbose_name='Shop Name')
     shop_no = models.CharField(max_length=15, verbose_name='Shop No.')
     img = models.ImageField(_('Image'), upload_to=upload_to_shop_image_primary,
-            validators=[FileExtensionValidator(allowed_extensions=["png","jpeg"])])
+            validators=[FileExtensionValidator(allowed_extensions=["png","jpeg","jpg"])])
     contact_no = models.CharField(max_length=15, verbose_name='Contact No.')
     # location
     station = models.ForeignKey(Station, on_delete=models.CASCADE, verbose_name='Railway Station')

@@ -15,3 +15,14 @@ class AddShopMsg:
         "Thank you for choosing us as your partner!\n"\
         "If you have any questions or need assistance, feel free to contact our support team.\n"\
         "Welcome to the iDukaan family!"
+    
+
+class ShopList:
+    def irOrgShopListEmptyMng():
+        return {
+            'error' : {
+                'code' : 'irOrgShopListEmptyMng_iDukaan',
+                'message' : 'Shops/Stalls at railway station premises are not registered on iDukaan.'
+            } 
+        }
+    

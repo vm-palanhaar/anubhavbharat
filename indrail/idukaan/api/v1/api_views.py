@@ -86,7 +86,34 @@ class ShopApi(viewsets.ViewSet, PermissionRequiredMixin):
         return response_403(response_data) 
 
     def list(self, request, *args, **kwargs):
-        pass
+        response_data = {}
+        response_data['org_id'] = kwargs['orgId']
+        org_emp = BApiV1Srv.ValidateOrgEmpObj(user=request.user, org=kwargs['orgId'])
+        # org is active and verified
+        if org_emp != None and BApiV1Srv.ValidateOrgObj(org=org_emp.org):
+            # if emp is manager -> show all ir shops associated with organization 
+            if org_emp.is_manager:
+                shops = IrMdl.Shop.objects.filter(org = kwargs['orgId'])
+                if shops.count() > 0:
+                    serializer = IrSrl.OrgShopList_iDukaanSrl(shops, many=True)
+                    response_data['ir_shops'] = serializer.data
+                    return response_200(response_data)
+                response_data.update(IrApiV1Msg.ShopList.irOrgShopListEmptyMng())
+                return response_400(response_data)
+            # emp is not manager of organization -> only show associated shops
+            emp_shops = IrMdl.ShopEmp.objects.filter(user = request.user, shop__org = kwargs['orgId'])
+            if emp_shops.count() > 0:
+                shop_list = []
+                for emp_shop in emp_shops:
+                    serializer = IrSrl.OrgShopList_iDukaanSrl(emp_shop.shop)
+                    shop_list.append(serializer.data)
+                response_data['ir_shops'] = shop_list
+                return response_200(response_data)
+            response_data.update(IrApiV1Msg.ShopList.irOrgShopListEmptyMng())
+            return response_400(response_data)
+        # employee is not part of organization
+        response_data.update(BApiV1Msg.OrgEmpMsg.businessOrgEmpSelfNotFound())
+        return response_403(response_data)
 
     def partial_update(self, request, *args, **kwargs):
         pass

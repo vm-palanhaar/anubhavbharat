@@ -8,9 +8,10 @@ from indrail import models as IRMdl
 
 '''
 --- Common APIs serializers
-RailStationListSrl
+1. RailStationListSrl
 --- iDUkaan APIs serializers
-AddShop_iDukaanSrl
+1. AddShop_iDukaanSrl
+2. OrgShopList_iDukaanSrl
 --- Yatrigan APIs serializers
 '''
 
@@ -90,3 +91,15 @@ class AddShop_iDukaanSrl(serializers.ModelSerializer):
         shop_emp.save()
 
         return shop
+
+
+class OrgShopList_iDukaanSrl(serializers.ModelSerializer):
+    id = serializers.CharField()
+    org = serializers.SerializerMethodField()
+    class Meta:
+        model = IRMdl.Shop
+        fields = ['id','org','shop_no','name','img','station','plt1','plt2',
+                  'is_open', 'is_active','is_verified']
+        
+    def get_org(self, instance):
+        return str(instance.org.id)

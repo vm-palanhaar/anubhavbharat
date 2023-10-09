@@ -8,6 +8,7 @@ urlpatterns = [
             #PROD
             path('shop', APIv1.ShopApi.as_view({
                 'post': 'create',
+                'get': 'list',
             })),
             #DEV
         ])),
