@@ -140,3 +140,14 @@ class ShopApi(viewsets.ViewSet, PermissionRequiredMixin):
         response_data.update(TErr.badActionUser(request = request, \
                 reason = 'irShopPartialUpdate?shopId_url={0}&body={1}'.format(kwargs['shopId'], request.data['id'])))
         return response_403(response_data)
+
+    def retrieve(self, request, *args, **kwargs):
+        response_data = {}
+        response_data['id'] = kwargs['shopId']
+        org_shop_emp = IrApiV1Srv.ValidateOrgShopEmp(user=request.user, shop=kwargs['shopId'], org=kwargs['orgId'])
+        if org_shop_emp != None and org_shop_emp['shop'] != None:
+            serializer = IrSrl.ShopInfo_iDukaanSrl(org_shop_emp['shop'])
+            response_data['ir_shop'] = serializer.data
+            return response_200(response_data)
+        response_data.update(IrApiV1Msg.ShopEmpMsg.irOrgShopEmpSelfNotFound())
+        return response_400(response_data)

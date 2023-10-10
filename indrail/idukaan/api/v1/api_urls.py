@@ -12,6 +12,7 @@ urlpatterns = [
             })),
             path('shop/<str:shopId>', APIv1.ShopApi.as_view({
                 'patch': 'partial_update',
+                'get': 'retrieve',
             })),
             #DEV
         ])),

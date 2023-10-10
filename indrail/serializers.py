@@ -12,6 +12,8 @@ from indrail import models as IRMdl
 --- iDUkaan APIs serializers
 1. AddShop_iDukaanSrl
 2. OrgShopList_iDukaanSrl
+3. UpdateShop_iDukaanSrl
+4. ShopInfo_iDukaanSrl
 --- Yatrigan APIs serializers
 '''
 
@@ -109,3 +111,11 @@ class UpdateShop_iDukaanSrl(serializers.ModelSerializer):
     class Meta:
         model = IRMdl.Shop
         fields = ['id','contact_no','is_open','is_cash','is_card','is_upi']
+
+
+class ShopInfo_iDukaanSrl(serializers.ModelSerializer):
+    id = serializers.CharField()
+    station = serializers.CharField()
+    class Meta:
+        model = IRMdl.Shop
+        exclude = ['org','created_at','updated_at','lat','lon']
