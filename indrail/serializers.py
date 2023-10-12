@@ -98,13 +98,21 @@ class AddShop_iDukaanSrl(serializers.ModelSerializer):
 class OrgShopList_iDukaanSrl(serializers.ModelSerializer):
     id = serializers.CharField()
     org = serializers.SerializerMethodField()
+    station = serializers.SerializerMethodField()
+    emp_manager = serializers.SerializerMethodField()
     class Meta:
         model = IRMdl.Shop
         fields = ['id','org','shop_no','name','img','station','plt1','plt2',
-                  'is_open', 'is_active','is_verified']
+                  'is_open', 'is_active','is_verified','emp_manager']
         
     def get_org(self, instance):
         return str(instance.org.id)
+    
+    def get_emp_manager(self, instance):
+        return self.context.get('emp_manager')
+    
+    def get_station(self, instance):
+        return f'{instance.station.name} - {instance.station.code}'
 
 
 class UpdateShop_iDukaanSrl(serializers.ModelSerializer):

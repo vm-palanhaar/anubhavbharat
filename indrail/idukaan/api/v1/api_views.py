@@ -52,7 +52,7 @@ class ShopApi(viewsets.ViewSet, PermissionRequiredMixin):
 
     def create(self, request, *args, **kwargs):
         response_data = {}
-        response_data['org_id'] = kwargs['orgId']
+        response_data['org'] = kwargs['orgId']
         if kwargs['orgId'] == str(request.data['org']):
             org_emp = BApiV1Srv.ValidateOrgEmpObj(user=request.user, org=kwargs['orgId'])
             # org is active and verified & employee is manager of the org
@@ -60,7 +60,8 @@ class ShopApi(viewsets.ViewSet, PermissionRequiredMixin):
                 # check the shop license no exists in ShopLic
                 try:
                     IrMdl.ShopLic.objects.get(reg_no = request.data['lic_no'])
-                    return response_409(IrApiV1Msg.AddShopMsg.addShopFoundFailed())
+                    response_data.update(IrApiV1Msg.AddShopMsg.addShopFoundFailed())
+                    return response_409(response_data)
                 except IrMdl.ShopLic.DoesNotExist:
                     pass
                 serializer = IrSrl.AddShop_iDukaanSrl(data = request.data, context={
@@ -88,7 +89,7 @@ class ShopApi(viewsets.ViewSet, PermissionRequiredMixin):
 
     def list(self, request, *args, **kwargs):
         response_data = {}
-        response_data['org_id'] = kwargs['orgId']
+        response_data['org'] = kwargs['orgId']
         org_emp = BApiV1Srv.ValidateOrgEmpObj(user=request.user, org=kwargs['orgId'])
         # org is active and verified
         if org_emp != None and BApiV1Srv.ValidateOrgObj(org=org_emp.org):
@@ -96,7 +97,8 @@ class ShopApi(viewsets.ViewSet, PermissionRequiredMixin):
             if org_emp.is_manager:
                 shops = IrMdl.Shop.objects.filter(org = kwargs['orgId'])
                 if shops.count() > 0:
-                    serializer = IrSrl.OrgShopList_iDukaanSrl(shops, many=True)
+                    serializer = IrSrl.OrgShopList_iDukaanSrl(shops, many=True, 
+                                                              context={'emp_manager':org_emp.is_manager})
                     response_data['ir_shops'] = serializer.data
                     return response_200(response_data)
                 response_data.update(IrApiV1Msg.ShopList.irOrgShopListEmptyMng())
@@ -106,7 +108,7 @@ class ShopApi(viewsets.ViewSet, PermissionRequiredMixin):
             if emp_shops.count() > 0:
                 shop_list = []
                 for emp_shop in emp_shops:
-                    serializer = IrSrl.OrgShopList_iDukaanSrl(emp_shop.shop)
+                    serializer = IrSrl.OrgShopList_iDukaanSrl(emp_shop.shop, context={'emp_manager':emp_shop.is_manager})
                     shop_list.append(serializer.data)
                 response_data['ir_shops'] = shop_list
                 return response_200(response_data)
