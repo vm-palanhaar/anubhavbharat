@@ -116,6 +116,7 @@ class OrgShopList_iDukaanSrl(serializers.ModelSerializer):
 
 
 class UpdateShop_iDukaanSrl(serializers.ModelSerializer):
+    id = serializers.CharField()
     class Meta:
         model = IRMdl.Shop
         fields = ['id','contact_no','is_open','is_cash','is_card','is_upi']

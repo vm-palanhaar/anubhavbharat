@@ -129,6 +129,7 @@ class ShopApi(viewsets.ViewSet, PermissionRequiredMixin):
                     serializer = IrSrl.UpdateShop_iDukaanSrl(org_shop_emp['shop'], data=request.data, partial=True)
                     if serializer.is_valid():
                         serializer.save()
+                        response_data['ir_shop'] = serializer.data
                         return response_200(response_data)
                     return response_400(serializer.errors)
                 response_data.update(IrApiV1Msg.ShopEmpMsg.irOrgShopEmpNotMng(shop=org_shop_emp['shop']))
