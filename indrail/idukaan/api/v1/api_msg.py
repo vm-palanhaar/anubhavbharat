@@ -1,4 +1,4 @@
-class AddShopMsg:
+class IrAddShopMsg:
     def addShopFoundFailed():
         return {
             'error' : {
@@ -11,18 +11,18 @@ class AddShopMsg:
         }
     
     def addShopSuccess():
-        return "Your shop/stall has been successfully registered on the iDukaan platform. "\
+        return "Your stall has been successfully registered on the iDukaan platform. "\
         "Thank you for choosing us as your partner!\n"\
         "If you have any questions or need assistance, feel free to contact our support team.\n"\
         "Welcome to the iDukaan family!"
     
 
-class ShopList:
+class IrShopList:
     def irOrgShopListEmptyMng():
         return {
             'error' : {
                 'code' : 'irOrgShopListEmptyMng_iDukaan',
-                'message' : 'Shops/Stalls at railway station premises are not registered on iDukaan.'
+                'message' : 'Stalls at railway station premises are not registered on iDukaan.'
             } 
         }
     
@@ -30,7 +30,7 @@ class ShopList:
         return {
             'error' : {
                 'code' : 'irOrgShopListEmptyMng_iDukaan',
-                'message' : 'Shops/Stalls at railway station premises are not registered on iDukaan.'
+                'message' : 'Stalls at railway station premises are not registered on iDukaan.'
             } 
         }
     
@@ -38,12 +38,12 @@ class ShopList:
         return {
             'error' : {
                 'code' : 'irOrgShopNotFound_iDukaan',
-                'message' : 'This shop/stall had been deleted from iDukaan.'
+                'message' : 'This stall had been deleted from iDukaan.'
             }
         }
-    
 
-class ShopEmpMsg:
+
+class IrShopEmpMsg:
     def irOrgShopEmpNotMng(shop):
         return {
             'error' : {
@@ -57,5 +57,16 @@ class ShopEmpMsg:
             'error' : {
                 'code' : 'irOrgShopEmpSelfNotFound_iDukaan',
                 'message' : 'You are no longer associated with shop/stall.'
+            }
+        }
+
+
+class IrShopStatusMsg:
+    def irShopNotVerified():
+        return {
+            'error' : {
+                'code' : 'irShopNotVerified_iDukaan',
+                'message' : "Your stall's verification process is currently pending. Until verification is complete, certain features "\
+                            "will remain disabled. To know more about verification process, please refer to the Settings and Help section.\n"\
             }
         }

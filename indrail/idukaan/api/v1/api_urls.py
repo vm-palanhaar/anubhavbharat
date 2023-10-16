@@ -14,6 +14,10 @@ urlpatterns = [
                 'patch': 'partial_update',
                 'get': 'retrieve',
             })),
+            path('shop/<str:shopId>/emp', APIv1.ShopEmpApi.as_view({
+                'post': 'create',
+                'get': 'list',
+            })),
             #DEV
         ])),
         #DEV

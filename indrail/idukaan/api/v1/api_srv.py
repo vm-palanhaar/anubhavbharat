@@ -8,34 +8,44 @@ def ValidateOrgShopEmp(user, shop, org):
     returning dictionary {'shop','emp','isMng'} else None
     '''
     org_emp = BApiV1Srv.ValidateOrgEmpObj(user=user, org=org)
-    # employee is org's manager
-    if org_emp != None and org_emp.is_manager == True:
+    if org_emp != None:
+        # query shop emp [to optimize shop query]
         try:
-            return {
-                'shop' : IrMdl.Shop.objects.get(id = shop, org = org),
-                'emp' : org_emp,
-                'isMng' : org_emp.is_manager
-            }
-        except IrMdl.Shop.DoesNotExist:
-            return {
-                'shop' : None,
-                'emp' : org_emp,
-                'isMng' : org_emp.is_manager
-            }
-    elif org_emp != None and org_emp.is_manager == False:
-        try:
-            shop_emp = IrMdl.ShopEmp.objects.get(user=user, shop=shop, shop__org=org)
-            return {
-                'shop' : shop_emp.shop,
-                'emp' : shop_emp,
-                'isMng' : shop_emp.is_manager
-            }
+            shop_emp = IrMdl.ShopEmp.objects.get(org_emp=org_emp, shop=shop)
         except IrMdl.ShopEmp.DoesNotExist:
+            shop_emp = None
+        # find shop from shop_emp query result [if null query shop]
+        shop_obj = shop_emp.shop if shop_emp != None else None
+        if shop_obj == None:
+            try:
+                ''' NEVER CHANGE FUNCTIONALITY
+                query with org_emp.org to prevent override ir shop from others
+                '''
+                shop_obj = IrMdl.Shop.objects.get(id=shop, org=org_emp.org)
+            except IrMdl.Shop.DoesNotExist:
+                pass
+
+        # emp is org's manager
+        if org_emp.is_manager == True:
             return {
-                'shop' : None,
-                'emp' : org_emp,
-                'isMng' : org_emp.is_manager
+                'org' : org_emp.org,
+                'shop' : shop_obj,
+                'orgEmp' : org_emp,
+                'shopEmp' : shop_emp,
+                'isMng' : org_emp.is_manager,
             }
+        elif org_emp.is_manager == False:
+            if shop_emp != None:
+                is_mng = True if shop_emp.is_manager != org_emp.is_manager else False
+            else:
+                is_mng = org_emp.is_manager
+            return {
+                    'org' : org_emp.org,
+                    'shop' : shop_obj,
+                    'orgEmp' : org_emp,
+                    'shopEmp' : shop_emp,
+                    'isMng' : is_mng,
+                }
     return None
 
 def ValidateShopObj(shop):

@@ -81,7 +81,7 @@ class OrgApi(viewsets.ViewSet, PermissionRequiredMixin):
                 response_map['emp_manager'] = org_emp.is_manager
                 orgs.append(response_map)
             response_data['org_list'] = orgs
-            response_data['is_verified_msg'] = BApiV1Msg.OrgListMsg.orgVerificationInProcess()
+            response_data['is_verified_msg'] = BApiV1Msg.OrgStatusMsg.businessOrgNotVerified()
             return Response(response_data, status=status.HTTP_200_OK)
         return response_400(BApiV1Msg.OrgListMsg.orgListFailed_NotFound())
 
@@ -141,7 +141,7 @@ class OrgEmpApi(viewsets.ViewSet, PermissionRequiredMixin):
                 return response_403(response_data)
             # org is active and not verified
             if org_emp != None and org_emp.org.is_verified == False:
-                response_data.update(BApiV1Msg.businessOrgNotVerified(org = org_emp.org))
+                response_data.update(BApiV1Msg.OrgStatusMsg.businessOrgNotVerified())
                 return response_403(response_data)
             # employee is not part of organization
             response_data.update(BApiV1Msg.OrgEmpMsg.businessOrgEmpSelfNotFound())
@@ -193,7 +193,7 @@ class OrgEmpApi(viewsets.ViewSet, PermissionRequiredMixin):
                 return response_403(response_data)
             # org is active and not verified
             if org_emp != None and org_emp.org.is_verified == False:
-                response_data.update(BApiV1Msg.businessOrgNotVerified(org = org_emp.org))
+                response_data.update(BApiV1Msg.OrgStatusMsg.businessOrgNotVerified())
                 return response_403(response_data)
             # employee is not part of organization
             response_data.update(BApiV1Msg.OrgEmpMsg.businessOrgEmpSelfNotFound())
@@ -229,7 +229,7 @@ class OrgEmpApi(viewsets.ViewSet, PermissionRequiredMixin):
                 return response_403(response_data)
             # org is active and not verified
             if org_emp != None and org_emp.org.is_verified == False:
-                response_data.update(BApiV1Msg.businessOrgNotVerified(org = org_emp.org))
+                response_data.update(BApiV1Msg.OrgStatusMsg.businessOrgNotVerified())
                 return response_403(response_data)
             # employee is not part of organization
             response_data.update(BApiV1Msg.OrgEmpMsg.businessOrgEmpSelfNotFound())

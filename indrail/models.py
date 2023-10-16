@@ -72,11 +72,11 @@ class Shop(TimestampModel):
 
 class ShopEmp(TimestampModel):
     shop = models.ForeignKey(Shop, on_delete=models.CASCADE, verbose_name='Shop')
-    user = models.ForeignKey(UMdl.User, on_delete=models.CASCADE, verbose_name='User')
+    org_emp = models.ForeignKey(BMdl.OrgEmp, on_delete=models.CASCADE, verbose_name='User')
     join_date = models.DateField(verbose_name='Joining Date')
     is_manager = models.BooleanField(default=False, verbose_name='Manager')
     def __str__(self):
-        return f'{self.user.first_name} {self.user.last_name}'
+        return f'{self.org_emp.user.first_name} {self.org_emp.user.last_name}'
 
 
 def upload_to_shop_license(instance,filename):

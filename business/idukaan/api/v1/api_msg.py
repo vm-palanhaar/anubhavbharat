@@ -32,19 +32,6 @@ class OrgListMsg:
         }
     }
 
-    def orgVerificationInProcess():
-        return "Your organization's verification process is currently pending. Until verification is complete, certain features "\
-        "will remain disabled. To verify your organization, please refer to the Settings and Help section.\n"\
-
-
-def businessOrgNotVerified(org):
-    return {
-        'error' : {
-            'code' : 'bussinessOrgNotVerified_iDukaan',
-            'message' : f'Verficiation in-progess for {org.name}. Please check your registered mail for verification process.'
-        }
-    }
-
 
 class OrgEmpMsg:
     def businessOrgEmpFound(emp): 
@@ -96,3 +83,14 @@ class OrgEmpMsg:
     
     def businessOrgEmpDeleteSuccess(emp_user):
         return f"{emp_user.user.first_name} {emp_user.user.last_name} has been terminated from {emp_user.org.name}."
+
+
+class OrgStatusMsg:
+    def businessOrgNotVerified():
+        return {
+            'error' : {
+                'code' : 'bussinessOrgNotVerified_iDukaan',
+                'message' : "Your organization's verification process is currently pending. Until verification is complete, certain features "\
+                            "will remain disabled. To verify your organization, please refer to the Settings and Help section.\n"\
+            }
+        }
