@@ -189,7 +189,7 @@ class ShopEmpApi(viewsets.ViewSet, PermissionRequiredMixin):
                     # check the requested user exists in shop
                     try:
                         shop_emp = IrMdl.ShopEmp.objects.get(org_emp = org_emp)
-                        response_data.update(IrApiV1Msg.IrShopEmpMsg.addIrShopEmpFound(user = org_emp.user, shop = shop_emp.shop))
+                        response_data.update(IrApiV1Msg.IrShopEmpMsg.addIrShopEmpFound(user = org_emp.user, shop = r_emp['shop']))
                         return response_409(response_data)
                     except IrMdl.ShopEmp.DoesNotExist:
                         pass
@@ -240,9 +240,8 @@ class ShopEmpApi(viewsets.ViewSet, PermissionRequiredMixin):
                 # variable r_emp is null [r_emp is no more associated with org]
                     response_data.update(BApiV1Msg.OrgEmpMsg.businessOrgEmpSelfNotFound())
                     return response_400(response_data)
-            
             # only exclude the shop emps
-            if 'org' in request.headers['Emp-List']:
+            if 'org' in request.headers['Emp-List'] and r_emp['isMng']:
                 if r_emp != None and r_emp['shop'] != None:
                     org_emps = BMdl.OrgEmp.objects.filter(org = r_emp['org'])
                     shop_emps = IrMdl.ShopEmp.objects.filter(shop = r_emp['shop']).values_list('org_emp', flat=True)
@@ -256,7 +255,6 @@ class ShopEmpApi(viewsets.ViewSet, PermissionRequiredMixin):
                         return response_200(response_data)
                     response_data.update(IrApiV1Msg.IrShopEmpMsg.addIrOrgShopEmpListDuplicate())
                     return response_409(response_data)
-                
             # only incluse shop emps
             if 'irshop' in request.headers['Emp-List']:
                 if r_emp != None and r_emp['shop'] != None:
@@ -264,16 +262,83 @@ class ShopEmpApi(viewsets.ViewSet, PermissionRequiredMixin):
                     serializer = IrSrl.ShopEmpList_iDukaanSrl(shop_emps, many=True)
                     response_data['ir_shop_emp_list'] = serializer.data
                     return response_200(response_data)
-                
             else:
-                #TODO: Block user to keep empty requested headers
-                pass
-        #TODO: Block user to omit requested headers
+                response_data.update(TErr.badActionUser(request=request, reason='irShopEmpList?Emp-List=HeaderEmpty'))
+                return response_403(response_data)
+        response_data.update(TErr.badActionUser(request=request, reason='irShopEmpList?Emp-List=HeaderNotFound'))
+        return response_403(response_data)
 
     def partial_update(self, request, *args, **kwargs):
         response_data = {}
-        pass
+        response_data['id'] = kwargs['empId']
+        response_data['shop_id'] = kwargs['shopId']
+        # validate id from URI and request body
+        if kwargs['empId'] == request.data['id']:
+            r_emp = IrApiV1Srv.ValidateOrgShopEmp(user=request.user, shop=kwargs['shopId'], org=kwargs['orgId'])
+            if r_emp != None and r_emp['shop'] != None:
+                if r_emp['isMng']:
+                    try:
+                        req_emp = IrMdl.ShopEmp.objects.get(id = request.data['id'])
+                    except IrMdl.ShopEmp.DoesNotExist:
+                        response_data.update(IrApiV1Msg.IrShopEmpMsg.irShopEmpNotFound(shop=r_emp['shop']))
+                        return response_400(response_data)
+                    # check if user is update/delete self
+                    if req_emp.org_emp.user == request.user:
+                        response_data.update(IrApiV1Msg.IrShopEmpMsg.irShopEmpSelfUd(shop=r_emp['shop']))
+                        return response_400(response_data)
+                    serializer = IrSrl.UpdateShopEmp_iDukaanSrl(req_emp, data=request.data, partial=True)
+                    if serializer.is_valid():
+                        serializer.save()
+                        response_data['ir_shop_emp'] = serializer.data
+                        response_data['message'] = IrApiV1Msg.IrShopEmpMsg.irShopEmpUpdateSuccess(user = req_emp.org_emp.user)
+                        return response_200(response_data)
+                response_data.update(IrApiV1Msg.IrShopEmpMsg.irOrgShopEmpNotMng(shop = r_emp['shop']))
+                return response_403(response_data)
+            if r_emp != None and r_emp['shop'] == None:
+                if r_emp['isMng']:
+                    response_data.update(IrApiV1Msg.IrShopList.irOrgShopNotFound())
+                    return response_400(response_data)
+                response_data.update(IrApiV1Msg.IrShopEmpMsg.irOrgShopEmpSelfNotFound())
+                return response_400(response_data)
+            # variable r_emp is null [r_emp is no more associated with org]
+            response_data.update(BApiV1Msg.OrgEmpMsg.businessOrgEmpSelfNotFound())
+            return response_400(response_data)
+        response_data.update(TErr.badActionUser(request = request, \
+                reason = 'irShopEmpPartialUpdate?shopEmpId_url={0}&body={1}'.format(kwargs['empId'], request.data['id'])))
+        return response_403(response_data)
 
     def destroy(self, request, *args, **kwargs):
         response_data = {}
-        pass
+        response_data['id'] = kwargs['empId']
+        response_data['shop_id'] = kwargs['shopId']
+        # validate id from URI and request body
+        if kwargs['empId'] == request.data['id']:
+            r_emp = IrApiV1Srv.ValidateOrgShopEmp(user=request.user, shop=kwargs['shopId'], org=kwargs['orgId'])
+            if r_emp != None and r_emp['shop'] != None:
+                if r_emp['isMng']:
+                    try:
+                        req_emp = IrMdl.ShopEmp.objects.get(id = request.data['id'])
+                    except IrMdl.ShopEmp.DoesNotExist:
+                        response_data.update(IrApiV1Msg.IrShopEmpMsg.irShopEmpNotFound(shop=r_emp['shop']))
+                        return response_400(response_data)
+                    # check if user is update/delete self
+                    if req_emp.org_emp.user == request.user:
+                        response_data.update(IrApiV1Msg.IrShopEmpMsg.irShopEmpSelfUd(shop=r_emp['shop']))
+                        return response_400(response_data)
+                    response_data['message'] = IrApiV1Msg.IrShopEmpMsg.irShopEmpDeleteSuccess(user=req_emp.org_emp.user, shop=r_emp['shop'])
+                    req_emp.delete()
+                    return response_200(response_data)
+                response_data.update(IrApiV1Msg.IrShopEmpMsg.irOrgShopEmpNotMng(shop = r_emp['shop']))
+                return response_403(response_data)
+            if r_emp != None and r_emp['shop'] == None:
+                if r_emp['isMng']:
+                    response_data.update(IrApiV1Msg.IrShopList.irOrgShopNotFound())
+                    return response_400(response_data)
+                response_data.update(IrApiV1Msg.IrShopEmpMsg.irOrgShopEmpSelfNotFound())
+                return response_400(response_data)
+            # variable r_emp is null [r_emp is no more associated with org]
+            response_data.update(BApiV1Msg.OrgEmpMsg.businessOrgEmpSelfNotFound())
+            return response_400(response_data)
+        response_data.update(TErr.badActionUser(request = request, \
+                reason = 'irShopEmpDelete?shopEmpId_url={0}&body={1}'.format(kwargs['empId'], request.data['id'])))
+        return response_403(response_data)

@@ -163,3 +163,28 @@ class ShopEmpList_iDukaanSrl(serializers.ModelSerializer):
         days = (delta.days % 365) % 30
 
         return f'{years} years {months} months {days} days'
+
+
+class UpdateShopEmp_iDukaanSrl(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
+    name = serializers.SerializerMethodField(read_only=True)
+    exp = serializers.SerializerMethodField(read_only=True)
+    class Meta:
+        model = IRMdl.ShopEmp
+        fields = ['id', 'name', 'is_manager','join_date', 'exp']
+
+    def get_name(self, instance):
+        user = UserMdl.User.objects.get(username=instance.org_emp.user)
+        return f'{user.first_name} {user.last_name}'
+    
+    def get_exp(self, instance):
+        joining_date = datetime.strptime(str(instance.join_date), '%Y-%m-%d')
+        current_date = datetime.now()
+
+        delta = current_date - joining_date
+
+        years = delta.days // 365
+        months = (delta.days % 365) // 30
+        days = (delta.days % 365) % 30
+
+        return f'{years} years {months} months {days} days'

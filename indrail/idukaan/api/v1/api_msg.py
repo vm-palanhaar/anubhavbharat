@@ -80,6 +80,28 @@ class IrShopEmpMsg:
                         "the list to bring them on board at your stall. Your choice plays a vital role in building "\
                         "a dynamic team. Let\'s get started!"
         }
+    
+    def irShopEmpNotFound(shop):
+        return {
+            'error' : {
+                'code' : 'irShopEmpNotFound_iDukaan',
+                'message' : f'User is no longer associated with {shop.name}. Please refresh to update employees list.'
+            }
+        }
+    
+    def irShopEmpSelfUd(shop):
+        return {
+            'error' : {
+                'code' : 'irShopEmpSelfUd_iDukaan',
+                'message' : f'You are not allowed to update or terminate yourself from {shop.name}!'
+            }
+        }
+    
+    def irShopEmpUpdateSuccess(user):
+        return f"{user.first_name} {user.last_name} profile has been successfully updated."
+    
+    def irShopEmpDeleteSuccess(user, shop):
+        return f"{user.first_name} {user.last_name} has been terminated from {shop.name}."
 
 
 class IrShopStatusMsg:
