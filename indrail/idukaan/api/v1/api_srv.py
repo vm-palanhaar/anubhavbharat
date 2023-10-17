@@ -38,6 +38,7 @@ def ValidateOrgShopEmp(user, shop, org):
             if shop_emp != None:
                 is_mng = True if shop_emp.is_manager != org_emp.is_manager else False
             else:
+                shop_obj = None
                 is_mng = org_emp.is_manager
             return {
                     'org' : org_emp.org,

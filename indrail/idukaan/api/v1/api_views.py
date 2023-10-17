@@ -14,6 +14,7 @@ from indrail.idukaan.api.v1 import api_msg as IrApiV1Msg
 from indrail.idukaan.api.v1 import api_srv as IrApiV1Srv
 
 from business import models as BMdl
+from business import serializers as BSrl
 from business.idukaan.api.v1 import api_msg as BApiV1Msg
 from business.idukaan.api.v1 import api_srv as BApiV1Srv
 
@@ -104,7 +105,7 @@ class ShopApi(viewsets.ViewSet, PermissionRequiredMixin):
                 response_data.update(IrApiV1Msg.IrShopList.irOrgShopListEmptyMng())
                 return response_400(response_data)
             # emp is not manager of organization -> only show associated shops
-            emp_shops = IrMdl.ShopEmp.objects.filter(user = request.user, shop__org = kwargs['orgId'])
+            emp_shops = IrMdl.ShopEmp.objects.filter(org_emp = org_emp)
             if emp_shops.count() > 0:
                 shop_list = []
                 for emp_shop in emp_shops:
@@ -181,14 +182,22 @@ class ShopEmpApi(viewsets.ViewSet, PermissionRequiredMixin):
                 if r_emp['isMng'] and IrApiV1Srv.ValidateShopObj(shop=r_emp['shop']):
                     # check the requested user exists in org emp
                     try:
-                        BMdl.OrgEmp.objects.get(id=request.data['org_emp'])
+                        org_emp = BMdl.OrgEmp.objects.get(id=request.data['org_emp'])
                     except BMdl.OrgEmp.DoesNotExist:
                         response_data.update(BApiV1Msg.OrgEmpMsg.businessOrgEmpNotFound(org = r_emp['org']))
                         return response_400(response_data)
+                    # check the requested user exists in shop
+                    try:
+                        shop_emp = IrMdl.ShopEmp.objects.get(org_emp = org_emp)
+                        response_data.update(IrApiV1Msg.IrShopEmpMsg.addIrShopEmpFound(user = org_emp.user, shop = shop_emp.shop))
+                        return response_409(response_data)
+                    except IrMdl.ShopEmp.DoesNotExist:
+                        pass
                     serializer = IrSrl.AddShopEmp_iDukaanSrl(data=request.data)
                     if serializer.is_valid():
                         serializer.save()
                         response_data['ir_shop_emp'] = serializer.data
+                        response_data['message'] = IrApiV1Msg.IrShopEmpMsg.addIrShopEmpSuccess(emp_user = org_emp.user)
                         return response_201(response_data)
                     return response_400(serializer.errors)
                 # r_emp is manager of org/shop and shop is not active/verified
@@ -216,23 +225,50 @@ class ShopEmpApi(viewsets.ViewSet, PermissionRequiredMixin):
     def list(self, request, *args, **kwargs):
         response_data = {}
         response_data['shop_id'] = kwargs['shopId']
-        r_emp = IrApiV1Srv.ValidateOrgShopEmp(user=request.user, shop=kwargs['shopId'], org=kwargs['orgId'])
-        # variable r_emp and shop is not null [shop is associated with org]
-        if r_emp != None and r_emp['shop'] != None:
-            shop_emps = IrMdl.ShopEmp.objects.filter(shop = r_emp['shop'])
-            serializer = IrSrl.ShopEmpList_iDukaanSrl(shop_emps, many=True)
-            response_data['ir_shop_emp_list'] = serializer.data
-            return response_200(response_data)
-        # variable r_emp is not null and shop is null [shop is not associated with org]
-        if r_emp != None and r_emp['shop'] == None:
-                if r_emp['isMng']:
-                    response_data.update(IrApiV1Msg.IrShopList.irOrgShopNotFound())
+        response_data['org_id'] = kwargs['orgId']
+        if 'Emp-List' in request.headers:
+            if 'org' in request.headers['Emp-List'] or 'irshop' in request.headers['Emp-List']:
+                r_emp = IrApiV1Srv.ValidateOrgShopEmp(user=request.user, shop=kwargs['shopId'], org=kwargs['orgId'])
+                # variable r_emp is not null and shop is null [shop is not associated with org]
+                if r_emp != None and r_emp['shop'] == None:
+                    if r_emp['isMng']:
+                        response_data.update(IrApiV1Msg.IrShopList.irOrgShopNotFound())
+                        return response_400(response_data)
+                    response_data.update(IrApiV1Msg.IrShopEmpMsg.irOrgShopEmpSelfNotFound())
                     return response_400(response_data)
-                response_data.update(IrApiV1Msg.IrShopEmpMsg.irOrgShopEmpSelfNotFound())
-                return response_400(response_data)
-        # variable r_emp is null [r_emp is no more associated with org]
-        response_data.update(BApiV1Msg.OrgEmpMsg.businessOrgEmpSelfNotFound())
-        return response_400(response_data)
+                if r_emp != None and r_emp['org'] == None:
+                # variable r_emp is null [r_emp is no more associated with org]
+                    response_data.update(BApiV1Msg.OrgEmpMsg.businessOrgEmpSelfNotFound())
+                    return response_400(response_data)
+            
+            # only exclude the shop emps
+            if 'org' in request.headers['Emp-List']:
+                if r_emp != None and r_emp['shop'] != None:
+                    org_emps = BMdl.OrgEmp.objects.filter(org = r_emp['org'])
+                    shop_emps = IrMdl.ShopEmp.objects.filter(shop = r_emp['shop']).values_list('org_emp', flat=True)
+                    emps = []
+                    for org_emp in org_emps:
+                        if org_emp.id not in shop_emps:
+                            emps.append(BSrl.OrgEmpListSerializer(org_emp).data)
+                    if len(emps) > 0:
+                        response_data['org_name'] = r_emp['org'].name
+                        response_data['org-shop_emp_list'] = emps
+                        return response_200(response_data)
+                    response_data.update(IrApiV1Msg.IrShopEmpMsg.addIrOrgShopEmpListDuplicate())
+                    return response_409(response_data)
+                
+            # only incluse shop emps
+            if 'irshop' in request.headers['Emp-List']:
+                if r_emp != None and r_emp['shop'] != None:
+                    shop_emps = IrMdl.ShopEmp.objects.filter(shop = r_emp['shop'])
+                    serializer = IrSrl.ShopEmpList_iDukaanSrl(shop_emps, many=True)
+                    response_data['ir_shop_emp_list'] = serializer.data
+                    return response_200(response_data)
+                
+            else:
+                #TODO: Block user to keep empty requested headers
+                pass
+        #TODO: Block user to omit requested headers
 
     def partial_update(self, request, *args, **kwargs):
         response_data = {}

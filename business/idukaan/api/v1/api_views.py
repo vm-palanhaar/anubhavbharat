@@ -81,7 +81,7 @@ class OrgApi(viewsets.ViewSet, PermissionRequiredMixin):
                 response_map['emp_manager'] = org_emp.is_manager
                 orgs.append(response_map)
             response_data['org_list'] = orgs
-            response_data['is_verified_msg'] = BApiV1Msg.OrgStatusMsg.businessOrgNotVerified()
+            response_data['is_verified_msg'] = BApiV1Msg.OrgStatusMsg.businessOrgNotVerified()['error']['message']
             return Response(response_data, status=status.HTTP_200_OK)
         return response_400(BApiV1Msg.OrgListMsg.orgListFailed_NotFound())
 

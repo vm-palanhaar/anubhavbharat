@@ -134,6 +134,7 @@ class ShopInfo_iDukaanSrl(serializers.ModelSerializer):
 
 class AddShopEmp_iDukaanSrl(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
+    join_date = serializers.DateField(write_only=True)
     class Meta:
         model = IRMdl.ShopEmp
         fields = ['id','shop','org_emp','join_date','is_manager']

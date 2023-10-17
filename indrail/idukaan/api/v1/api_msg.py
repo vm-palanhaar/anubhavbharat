@@ -26,14 +26,6 @@ class IrShopList:
             } 
         }
     
-    def irOrgShopListEmptyMng():
-        return {
-            'error' : {
-                'code' : 'irOrgShopListEmptyMng_iDukaan',
-                'message' : 'Stalls at railway station premises are not registered on iDukaan.'
-            } 
-        }
-    
     def irOrgShopNotFound():
         return {
             'error' : {
@@ -44,6 +36,18 @@ class IrShopList:
 
 
 class IrShopEmpMsg:
+    def addIrShopEmpSuccess(emp_user):
+        return f"Good news! {emp_user.first_name} {emp_user.last_name} has been successfully onboarded and is now part of our team. "\
+        "Please extend a warm welcome and provide any necessary guidance as they begin their journey with us."
+    
+    def addIrShopEmpFound(user, shop): 
+        return {
+            'error' : {
+                'code' : 'irShopEmpFound_iDukaan',
+                'message' : f'{user.first_name} {user.last_name} is already associated with {shop.name}'
+            }
+        }
+    
     def irOrgShopEmpNotMng(shop):
         return {
             'error' : {
@@ -58,6 +62,23 @@ class IrShopEmpMsg:
                 'code' : 'irOrgShopEmpSelfNotFound_iDukaan',
                 'message' : 'You are no longer associated with shop/stall.'
             }
+        }
+    
+    def addIrOrgShopEmpListDuplicate():
+        return {
+            'error' : {
+                'code' : 'addIrOrgShopEmpListDuplicate_iDukaan',
+                'message' : "Great news, Manager! All employees from your organization are already associated "\
+                "with this stall. Your team is ready to shine, and your event is set for success. If you "\
+                "have any other needs or questions, please don't hesitate to reach out iDukaan. Best of luck!"
+            }
+        }
+    
+    def addIrShopEmpListMessage():
+        return {
+            'message' : "Welcome, Manager! To streamline your onboarding process, please select an employee from "\
+                        "the list to bring them on board at your stall. Your choice plays a vital role in building "\
+                        "a dynamic team. Let\'s get started!"
         }
 
 
