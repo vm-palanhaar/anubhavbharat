@@ -102,3 +102,16 @@ class UserLoggedInApi(generics.GenericAPIView):
         serializer = self.get_serializer(user)
         response_data['user'] = serializer.data
         return response_200(response_data)
+
+
+class UserProfileApi(generics.RetrieveAPIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = UserSrl.UserProfileSrl
+
+    def get(self, request, *args, **kwargs):
+        response_data = {}
+        serializer = self.get_serializer(request.user)
+        response_data['user'] = serializer.data
+        return response_200(response_data)
+
