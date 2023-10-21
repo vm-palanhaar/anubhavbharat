@@ -7,5 +7,6 @@ urlpatterns = [
     path('ir/', include('indrail.common.api.api_urls')),
     # iDukaan
     path('idukaan/business/', include('business.idukaan.api.api_urls')),
+    path('idukaan/ir/', include('indrail.idukaan.api.api_urls')),
     # Yatrigan
 ]

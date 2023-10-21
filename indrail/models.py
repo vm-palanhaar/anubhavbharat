@@ -48,11 +48,11 @@ class Shop(TimestampModel):
     name = models.CharField(max_length=60, verbose_name='Shop Name')
     shop_no = models.CharField(max_length=15, verbose_name='Shop No.')
     img = models.ImageField(_('Image'), upload_to=upload_to_shop_image_primary,
-            validators=[FileExtensionValidator(allowed_extensions=["png","jpeg"])])
+            validators=[FileExtensionValidator(allowed_extensions=["png","jpeg","jpg"])])
     contact_no = models.CharField(max_length=15, verbose_name='Contact No.')
     # location
     station = models.ForeignKey(Station, on_delete=models.CASCADE, verbose_name='Railway Station')
-    lat = models.CharField(max_length=30, verbose_name='Latitdue')
+    lat = models.CharField(max_length=30, verbose_name='Latitude')
     lon = models.CharField(max_length=30, verbose_name='Longitude')
     plt1 = models.CharField(max_length=10, blank=True, null=True, verbose_name='Primary Platform')
     plt2 = models.CharField(max_length=10, blank=True, null=True, verbose_name='Secondary Platform')
@@ -72,11 +72,11 @@ class Shop(TimestampModel):
 
 class ShopEmp(TimestampModel):
     shop = models.ForeignKey(Shop, on_delete=models.CASCADE, verbose_name='Shop')
-    user = models.ForeignKey(UMdl.User, on_delete=models.CASCADE, verbose_name='User')
+    org_emp = models.ForeignKey(BMdl.OrgEmp, on_delete=models.CASCADE, verbose_name='User')
     join_date = models.DateField(verbose_name='Joining Date')
     is_manager = models.BooleanField(default=False, verbose_name='Manager')
     def __str__(self):
-        return f'{self.user.first_name} {self.user.last_name}'
+        return f'{self.org_emp.user.first_name} {self.org_emp.user.last_name}'
 
 
 def upload_to_shop_license(instance,filename):
