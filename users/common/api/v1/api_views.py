@@ -94,13 +94,11 @@ class UserLoginApi(generics.GenericAPIView):
 class UserLoggedInApi(generics.GenericAPIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
-    serializer_class = UserSrl.UserLoggedInSerializer
 
-    def get(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         response_data = {}
-        user = UserMdl.User.objects.get(username = request.user)
-        serializer = self.get_serializer(user)
-        response_data['user'] = serializer.data
+        request._auth.delete()
+        response_data['token'] = AuthToken.objects.create(request.user)[1]
         return response_200(response_data)
 
 
@@ -114,4 +112,3 @@ class UserProfileApi(generics.RetrieveAPIView):
         serializer = self.get_serializer(request.user)
         response_data['user'] = serializer.data
         return response_200(response_data)
-
