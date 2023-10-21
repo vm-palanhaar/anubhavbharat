@@ -2,9 +2,10 @@ from django.core.validators import FileExtensionValidator
 from django.utils.translation import gettext_lazy as _
 from django.db import models
 
-from tourism.models import TimestampModel
+from tourism.models.timestamp import TimestampModel
+from tourism.models.shops import ShopModel
+
 from business import models as BMdl
-from users import models as UMdl
 
 
 class Zone(models.Model):
@@ -43,31 +44,13 @@ def upload_to_shop_image_primary(instance,filename):
     folder_name = f'{instance.station.code}_{instance.shop_no}'
     return f'business/shop/ir/stations/{folder_name}/{filename}'
 
-class Shop(TimestampModel):
-    org = models.ForeignKey(BMdl.Org, on_delete=models.CASCADE, verbose_name='Organization')
-    name = models.CharField(max_length=60, verbose_name='Shop Name')
-    shop_no = models.CharField(max_length=15, verbose_name='Shop No.')
+class Shop(TimestampModel, ShopModel):
     img = models.ImageField(_('Image'), upload_to=upload_to_shop_image_primary,
             validators=[FileExtensionValidator(allowed_extensions=["png","jpeg","jpg"])])
-    contact_no = models.CharField(max_length=15, verbose_name='Contact No.')
     # location
     station = models.ForeignKey(Station, on_delete=models.CASCADE, verbose_name='Railway Station')
-    lat = models.CharField(max_length=30, verbose_name='Latitude')
-    lon = models.CharField(max_length=30, verbose_name='Longitude')
     plt1 = models.CharField(max_length=10, blank=True, null=True, verbose_name='Primary Platform')
     plt2 = models.CharField(max_length=10, blank=True, null=True, verbose_name='Secondary Platform')
-    # open/close status
-    is_open = models.BooleanField(default=False, verbose_name='Open')
-    # shop is orperational
-    is_active = models.BooleanField(default=False, verbose_name='Active')
-    # shop verified by following SOPs
-    is_verified = models.BooleanField(default=False, verbose_name='Verified')
-    # payments
-    is_cash = models.BooleanField(default=False, verbose_name='Cash')
-    is_card = models.BooleanField(default=False, verbose_name='Card')
-    is_upi = models.BooleanField(default=False, verbose_name='UPI')
-    # message
-    msg = models.TextField(blank=True, null=True, verbose_name='Message')
     def __str__(self):
         return f'{self.name}, {self.station.name} ({self.station.code})'
 
