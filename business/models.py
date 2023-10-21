@@ -30,6 +30,8 @@ class Org(TimestampModel):
     is_active = models.BooleanField(default=True, verbose_name='Active')
     # organization verified by following SOPs
     is_verified = models.BooleanField(default=False, verbose_name='Verified')
+    # message
+    msg = models.TextField(blank=True, null=True, verbose_name='Message')
 
     def __str__(self):
         return self.name

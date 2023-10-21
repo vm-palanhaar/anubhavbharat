@@ -62,7 +62,7 @@ class ShopConfig(admin.ModelAdmin):
         ('SHOP', {'fields':('org','name','shop_no','img','contact_no')}),
         ('INDIAN RAILWAYS', {'fields':('station','plt1','plt2','lat','lon')}),
         ('PAYMENT', {'fields':('is_cash','is_card','is_upi')}),
-        ('STATUS', {'fields':('is_open','is_active','is_verified')}),
+        ('STATUS', {'fields':('is_open','is_active','is_verified','msg')}),
     )
     raw_id_fields = ['org','station']
     inlines = [ShopLicAdmin,ShopEmpAdmin]

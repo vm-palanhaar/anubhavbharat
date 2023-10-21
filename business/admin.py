@@ -20,7 +20,7 @@ class OrgEmpAdmin(admin.TabularInline):
 
 @admin.register(BModel.Org)
 class OrgConfig(admin.ModelAdmin):
-    list_display = ['name','reg_no','type','is_active','is_verified']
+    list_display = ['name','reg_no','type','is_active','is_verified','msg']
     list_filter = ['type','is_active','is_verified']
     search_fields = ['name','reg_no']
     raw_id_fields = ['type']

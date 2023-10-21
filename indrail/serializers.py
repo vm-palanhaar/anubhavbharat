@@ -105,7 +105,7 @@ class OrgShopList_iDukaanSrl(serializers.ModelSerializer):
     class Meta:
         model = IRMdl.Shop
         fields = ['id','org','shop_no','name','img','station','plt1','plt2',
-                  'is_open', 'is_active','is_verified','emp_manager']
+                  'is_open', 'is_active','is_verified','emp_manager','msg']
         
     def get_org(self, instance):
         return str(instance.org.id)

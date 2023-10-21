@@ -66,6 +66,8 @@ class Shop(TimestampModel):
     is_cash = models.BooleanField(default=False, verbose_name='Cash')
     is_card = models.BooleanField(default=False, verbose_name='Card')
     is_upi = models.BooleanField(default=False, verbose_name='UPI')
+    # message
+    msg = models.TextField(blank=True, null=True, verbose_name='Message')
     def __str__(self):
         return f'{self.name}, {self.station.name} ({self.station.code})'
 
