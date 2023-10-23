@@ -51,3 +51,9 @@ class UserLoggedInSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserMdl.User
         fields = ['username','first_name','last_name','is_verified']
+
+
+class UserProfileSrl(serializers.ModelSerializer):
+    class Meta:
+        model = UserMdl.User
+        fields = ['first_name','last_name','username','email','contact_no','is_active','is_verified']

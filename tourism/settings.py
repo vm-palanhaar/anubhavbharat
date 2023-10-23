@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     # django apps
     'users',
     'business',
+    'indrail',
 ]
 
 AUTH_USER_MODEL = 'users.User'
@@ -86,7 +87,7 @@ PASSWORD_HASHERS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kolkata'
 
 USE_I18N = True
 
