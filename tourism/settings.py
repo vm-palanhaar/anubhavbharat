@@ -24,7 +24,6 @@ INSTALLED_APPS = [
     # packages
     'rest_framework',
     'knox',
-    'django_crontab',
     # django apps
     'users',
     'business',
