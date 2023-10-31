@@ -48,8 +48,8 @@ class RailwayStationConfig(admin.ModelAdmin):
     inlines = [ShopAdmin]
 
 
-class ShopLicAdmin(admin.TabularInline):
-    model = IRMdl.ShopLic
+class ShopDocAdmin(admin.TabularInline):
+    model = IRMdl.ShopDoc
     extra = 0
 
 class ShopEmpAdmin(admin.TabularInline):
@@ -65,4 +65,4 @@ class ShopConfig(admin.ModelAdmin):
         ('STATUS', {'fields':('is_open','is_active','is_verified','msg')}),
     )
     raw_id_fields = ['org','station']
-    inlines = [ShopLicAdmin,ShopEmpAdmin]
+    inlines = [ShopDocAdmin,ShopEmpAdmin]

@@ -55,7 +55,6 @@ class AddShop_iDukaanSrl(serializers.ModelSerializer):
     def create(self, validated_data):
         today_date = date.today()
         is_active = today_date < validated_data['lic_ed']
-
         shop = IRMdl.Shop.objects.create(
             org = self.context.get('org'),
             name = validated_data['name'],
@@ -76,16 +75,7 @@ class AddShop_iDukaanSrl(serializers.ModelSerializer):
             is_active = is_active,
         )
         shop.save()
-
-        shop_lic = IRMdl.ShopLic.objects.create(
-            shop = shop,
-            reg_no = validated_data['lic_no'],
-            doc = validated_data['lic_doc'],
-            start_date = validated_data['lic_sd'],
-            end_date = validated_data['lic_ed'],
-        )
-        shop_lic.save()
-
+        # add employee as manager
         shop_emp = IRMdl.ShopEmp.objects.create(
             shop = shop,
             org_emp = self.context.get('org_emp'),
@@ -93,7 +83,15 @@ class AddShop_iDukaanSrl(serializers.ModelSerializer):
             is_manager = True
         )
         shop_emp.save()
-
+        # add shop X lic doc
+        shop_lic = IRMdl.ShopDoc.objects.create(
+            shop = shop,
+            reg_no = validated_data['lic_no'],
+            doc = validated_data['lic_doc'],
+            start_date = validated_data['lic_sd'],
+            end_date = validated_data['lic_ed'],
+        )
+        shop_lic.save()
         return shop
 
 
