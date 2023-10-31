@@ -41,7 +41,7 @@ class Station(models.Model):
 
 def upload_to_shop_image_primary(instance,filename):
     folder_name = f'{instance.station.code}_{instance.shop_no}'
-    return f'business/shop/ir/stations/{folder_name}/{filename}'
+    return f'business/shop/ir/station/{folder_name}/{filename}'
 
 class Shop(ShopMdl):
     img = models.ImageField(_('Image'), upload_to=upload_to_shop_image_primary,
