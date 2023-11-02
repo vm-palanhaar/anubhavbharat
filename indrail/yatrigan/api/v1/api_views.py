@@ -29,3 +29,20 @@ class ShopListApi(generics.ListAPIView):
         else:
             response_data.update(IrApiV1Msg.ShopListMsg.irShopListEmpty(shops[0].station.name, shops[0].station.code))
             return response_400(response_data)
+
+
+class ShopInfoApi(generics.RetrieveAPIView):
+    serializer_class = IrSrl.ShopInfo_YatriganSrl
+
+    def get(self, request, *args, **kwargs):
+        response_data = {}
+        response_data['shopId'] = kwargs['shopId']
+        try:
+          shop = IrMdl.Shop.objects.get(station=kwargs['station'], id=kwargs['shopId'], is_active=True, is_verified=True)
+        except IrMdl.Shop.DoesNotExist:
+            station = IrMdl.Station.objects.get(code = kwargs['station'])
+            response_data.update(IrApiV1Msg.ShopListMsg.irShopListEmpty(station.name, station.code))
+            return response_400(response_data)      
+        serializer = self.get_serializer(shop)
+        response_data['info'] = serializer.data
+        return response_200(response_data)

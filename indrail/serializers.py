@@ -17,6 +17,8 @@ from users import models as UserMdl
 3. UpdateShop_iDukaanSrl
 4. ShopInfo_iDukaanSrl
 --- Yatrigan APIs serializers
+1. ShopList_YatriganSrl
+2. ShopInfo_YatriganSrl
 '''
 
 class RailStationListSrl(serializers.ModelSerializer):
@@ -193,3 +195,10 @@ class ShopList_YatriganSrl(serializers.ModelSerializer):
     class Meta:
         model = IRMdl.Shop
         fields = ['id','name','shop_no','img','plt1','plt2','is_open']
+
+
+class ShopInfo_YatriganSrl(serializers.ModelSerializer):
+    id = serializers.CharField()
+    class Meta:
+        model = IRMdl.Shop
+        fields = ['id','name','shop_no','img','contact_no','plt1','plt2','is_cash','is_card','is_upi','lat','lon']
