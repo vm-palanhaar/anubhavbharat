@@ -186,3 +186,10 @@ class UpdateShopEmp_iDukaanSrl(serializers.ModelSerializer):
         days = (delta.days % 365) % 30
 
         return f'{years} years {months} months {days} days'
+
+
+class ShopList_YatriganSrl(serializers.ModelSerializer):
+    id = serializers.CharField()
+    class Meta:
+        model = IRMdl.Shop
+        fields = ['id','name','shop_no','img','plt1','plt2','is_open']
