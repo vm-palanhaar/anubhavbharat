@@ -66,3 +66,19 @@ class ShopConfig(admin.ModelAdmin):
     )
     raw_id_fields = ['org','station']
     inlines = [ShopDocAdmin,ShopEmpAdmin]
+
+
+class TrainScheduleAdmin(admin.TabularInline):
+    model = IRMdl.TrainSchedule
+    raw_id_fields = ['station']
+    extra = 0
+
+@admin.register(IRMdl.Train)
+class TrainConfig(admin.ModelAdmin):
+    fieldsets = (
+        ('TRAIN', {'fields':('train_no','train_name')}),
+        ('STATION', {'fields':('station_from','station_to','duration')}),
+        ('RUN', {'fields':('run_sun','run_mon','run_tue','run_wed','run_thu','run_fri','run_sat','run_daily')}),
+    )
+    raw_id_fields = ['station_from','station_to']
+    inlines = [TrainScheduleAdmin]

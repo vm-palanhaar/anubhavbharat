@@ -16,3 +16,12 @@ class ShopListMsg:
                         '- not registered on iDukaan.'
             }
         }
+    
+class TrainMsg:
+    def irTrainNotFound():
+        return {
+            'error' : {
+                'code' : 'trainNotFound_Yatrigan',
+                'message' : 'Train not found!'
+            }
+        }

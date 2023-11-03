@@ -19,6 +19,8 @@ from users import models as UserMdl
 --- Yatrigan APIs serializers
 1. ShopList_YatriganSrl
 2. ShopInfo_YatriganSrl
+3. TrainList_YatriganSrl
+4. TrainSchedule_YatriganSrl [_TrainScheduleStationList]
 '''
 
 class RailStationListSrl(serializers.ModelSerializer):
@@ -202,3 +204,62 @@ class ShopInfo_YatriganSrl(serializers.ModelSerializer):
     class Meta:
         model = IRMdl.Shop
         fields = ['id','name','shop_no','img','contact_no','plt1','plt2','is_cash','is_card','is_upi','lat','lon']
+
+
+class TrainList_YatriganSrl(serializers.ModelSerializer):
+    train = serializers.SerializerMethodField()
+    class Meta:
+        model = IRMdl.Train
+        fields = ['train']
+
+    def get_train(self, instance):
+        return f'{instance.train_no} - {instance.train_name}'
+    
+class _TrainScheduleStationList(serializers.ModelSerializer):
+    station = serializers.SerializerMethodField()
+    class Meta:
+        model = IRMdl.TrainSchedule
+        exclude = ['id','seq','train']
+    
+    def get_station(self, instance):
+        return f'{instance.station.name} - {instance.station.code}'
+    
+
+class TrainSchedule_YatriganSrl(serializers.ModelSerializer):
+    station_from = serializers.SerializerMethodField()
+    station_to = serializers.SerializerMethodField()
+    stations = serializers.SerializerMethodField()
+    run_status = serializers.SerializerMethodField()
+    class Meta:
+        model = IRMdl.Train
+        fields = ['train_no','train_name','station_from','station_to'
+                  ,'stations','run_status','duration']
+        
+    def get_station_from(self, instance):
+        return f'{instance.station_from.name} - {instance.station_from.code}'
+    
+    def get_station_to(self, instance):
+        return f'{instance.station_to.name} - {instance.station_from.code}'
+
+    def get_stations(self, instance):
+        schedule = IRMdl.TrainSchedule.objects.filter(train=instance)
+        serializer = _TrainScheduleStationList(schedule, many=True)
+        return serializer.data
+    
+    def get_run_status(self, instance):
+        days = []
+        if instance.run_sun:
+            days.append('SUN')
+        if instance.run_mon:
+            days.append('MON')
+        if instance.run_tue:
+            days.append('TUE')
+        if instance.run_wed:
+            days.append('WED')
+        if instance.run_thu:
+            days.append('THU')
+        if instance.run_fri:
+            days.append('FRi')
+        if instance.run_sat:
+            days.append('SAT')
+        return days

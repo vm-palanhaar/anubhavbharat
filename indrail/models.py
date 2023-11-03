@@ -90,3 +90,36 @@ class ShopGst(ShopLicExpMdl):
     gst = models.ForeignKey(BMdl.OrgDoc, on_delete=models.CASCADE, verbose_name='GSTIN')
     def __str__(self):
         return self.shop.name
+    
+
+class Train(models.Model):
+    train_no = models.IntegerField(verbose_name='Train No', primary_key=True)
+    train_name = models.CharField(max_length=60, verbose_name='Train Name')
+    station_from = models.ForeignKey(Station, on_delete=models.CASCADE, verbose_name='Station From', related_name='train_station_from')
+    station_to = models.ForeignKey(Station, on_delete=models.CASCADE, verbose_name='Station To', related_name='train_station_to')
+    run_sun = models.BooleanField(default=False, verbose_name='Train runs on Sunday')
+    run_mon = models.BooleanField(default=False, verbose_name='Train runs on Monday')
+    run_tue = models.BooleanField(default=False, verbose_name='Train runs on Tuesday')
+    run_wed = models.BooleanField(default=False, verbose_name='Train runs on Wednesday')
+    run_thu = models.BooleanField(default=False, verbose_name='Train runs on Thursday')
+    run_fri = models.BooleanField(default=False, verbose_name='Train runs on Friday')
+    run_sat = models.BooleanField(default=False, verbose_name='Train runs on Saturday')
+    run_daily = models.BooleanField(default=False, verbose_name='Train runs Daily')
+    duration = models.CharField(max_length=15, null=True, blank=True, verbose_name='Duration')
+    def __str__(self):
+        return f'{self.train_no} - {self.train_name}'
+
+
+class TrainSchedule(models.Model):
+    train = models.ForeignKey(Train, on_delete=models.CASCADE, verbose_name='Train')
+    seq = models.IntegerField(verbose_name='Station No')
+    day = models.IntegerField(verbose_name='Day')
+    distance = models.IntegerField(verbose_name='Distance (in KMs)')
+    station = models.ForeignKey(Station, on_delete=models.CASCADE, verbose_name='Station')
+    platform = models.CharField(max_length=6, blank=True, null=True, verbose_name='Platform')
+    dep_time = models.TimeField(null=True, blank=True, verbose_name='Departure Time')
+    arv_time = models.TimeField(null=True, blank=True, verbose_name='Arrival Time')
+    halt_time = models.TimeField(null=True, blank=True, verbose_name='Halt Time')
+    rev_dir = models.BooleanField(default=False, verbose_name='Reverse Direction')
+    def __str__(self):
+        return f'{self.station.name} - {self.station.code}'

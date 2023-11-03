@@ -27,7 +27,8 @@ class ShopListApi(generics.ListAPIView):
             response_data.update(IrApiV1Msg.ShopListMsg.irShopListInActiveNotVerified(shops[0].station.name, shops[0].station.code))
             return response_400(response_data)
         else:
-            response_data.update(IrApiV1Msg.ShopListMsg.irShopListEmpty(shops[0].station.name, shops[0].station.code))
+            station = IrMdl.Station.objects.get(code = kwargs['station'])
+            response_data.update(IrApiV1Msg.ShopListMsg.irShopListEmpty(station.name, station.code))
             return response_400(response_data)
 
 
@@ -46,3 +47,35 @@ class ShopInfoApi(generics.RetrieveAPIView):
         serializer = self.get_serializer(shop)
         response_data['info'] = serializer.data
         return response_200(response_data)
+
+
+class TrainListApi(generics.ListAPIView):
+    serializer_class = IrSrl.TrainList_YatriganSrl
+
+    def get(self, request, *args, **kwargs):
+        trains = IrMdl.Train.objects.all()
+        serializer = self.get_serializer(trains, many=True)
+        trains = []
+        for station in serializer.data:
+            trains.append(station['train'])
+        return response_200({
+            "total" : len(trains),
+            "trains" : trains,
+        })
+
+
+class TrainScheduleApi(generics.GenericAPIView):
+    serializer_class = IrSrl.TrainSchedule_YatriganSrl
+
+    def get(self, request, *args, **kwargs):
+        response_data = {}
+        response_data['train'] = request.headers['train']
+        try:
+            train = IrMdl.Train.objects.get(train_no=request.headers['train'])
+        except IrMdl.Train.DoesNotExist:
+            response_data.update(IrApiV1Msg.TrainMsg.irTrainNotFound())
+            return response_400(response_data)  
+        serializers = self.get_serializer(train)
+        response_data['schedule'] = serializers.data
+        return response_200(response_data)
+       
