@@ -17,6 +17,10 @@ from users import models as UserMdl
 3. UpdateShop_iDukaanSrl
 4. ShopInfo_iDukaanSrl
 --- Yatrigan APIs serializers
+1. ShopList_YatriganSrl
+2. ShopInfo_YatriganSrl
+3. TrainList_YatriganSrl
+4. TrainSchedule_YatriganSrl [_TrainScheduleStationList]
 '''
 
 class RailStationListSrl(serializers.ModelSerializer):
@@ -55,7 +59,6 @@ class AddShop_iDukaanSrl(serializers.ModelSerializer):
     def create(self, validated_data):
         today_date = date.today()
         is_active = today_date < validated_data['lic_ed']
-
         shop = IRMdl.Shop.objects.create(
             org = self.context.get('org'),
             name = validated_data['name'],
@@ -76,16 +79,7 @@ class AddShop_iDukaanSrl(serializers.ModelSerializer):
             is_active = is_active,
         )
         shop.save()
-
-        shop_lic = IRMdl.ShopLic.objects.create(
-            shop = shop,
-            reg_no = validated_data['lic_no'],
-            doc = validated_data['lic_doc'],
-            start_date = validated_data['lic_sd'],
-            end_date = validated_data['lic_ed'],
-        )
-        shop_lic.save()
-
+        # add employee as manager
         shop_emp = IRMdl.ShopEmp.objects.create(
             shop = shop,
             org_emp = self.context.get('org_emp'),
@@ -93,7 +87,15 @@ class AddShop_iDukaanSrl(serializers.ModelSerializer):
             is_manager = True
         )
         shop_emp.save()
-
+        # add shop X lic doc
+        shop_lic = IRMdl.ShopDoc.objects.create(
+            shop = shop,
+            reg_no = validated_data['lic_no'],
+            doc = validated_data['lic_doc'],
+            start_date = validated_data['lic_sd'],
+            end_date = validated_data['lic_ed'],
+        )
+        shop_lic.save()
         return shop
 
 
@@ -188,3 +190,76 @@ class UpdateShopEmp_iDukaanSrl(serializers.ModelSerializer):
         days = (delta.days % 365) % 30
 
         return f'{years} years {months} months {days} days'
+
+
+class ShopList_YatriganSrl(serializers.ModelSerializer):
+    id = serializers.CharField()
+    class Meta:
+        model = IRMdl.Shop
+        fields = ['id','name','shop_no','img','plt1','plt2','is_open']
+
+
+class ShopInfo_YatriganSrl(serializers.ModelSerializer):
+    id = serializers.CharField()
+    class Meta:
+        model = IRMdl.Shop
+        fields = ['id','name','shop_no','img','contact_no','plt1','plt2','is_cash','is_card','is_upi','lat','lon']
+
+
+class TrainList_YatriganSrl(serializers.ModelSerializer):
+    train = serializers.SerializerMethodField()
+    class Meta:
+        model = IRMdl.Train
+        fields = ['train']
+
+    def get_train(self, instance):
+        return f'{instance.train_no} - {instance.train_name}'
+    
+class _TrainScheduleStationList(serializers.ModelSerializer):
+    station = serializers.SerializerMethodField()
+    class Meta:
+        model = IRMdl.TrainSchedule
+        exclude = ['id','seq','train']
+    
+    def get_station(self, instance):
+        return f'{instance.station.name} - {instance.station.code}'
+    
+
+class TrainSchedule_YatriganSrl(serializers.ModelSerializer):
+    station_from = serializers.SerializerMethodField()
+    station_to = serializers.SerializerMethodField()
+    stations = serializers.SerializerMethodField()
+    run_status = serializers.SerializerMethodField()
+    class Meta:
+        model = IRMdl.Train
+        fields = ['train_no','train_name','station_from','station_to'
+                  ,'stations','run_status','duration']
+        
+    def get_station_from(self, instance):
+        return f'{instance.station_from.name} - {instance.station_from.code}'
+    
+    def get_station_to(self, instance):
+        return f'{instance.station_to.name} - {instance.station_from.code}'
+
+    def get_stations(self, instance):
+        schedule = IRMdl.TrainSchedule.objects.filter(train=instance)
+        serializer = _TrainScheduleStationList(schedule, many=True)
+        return serializer.data
+    
+    def get_run_status(self, instance):
+        days = []
+        if instance.run_sun:
+            days.append('SUN')
+        if instance.run_mon:
+            days.append('MON')
+        if instance.run_tue:
+            days.append('TUE')
+        if instance.run_wed:
+            days.append('WED')
+        if instance.run_thu:
+            days.append('THU')
+        if instance.run_fri:
+            days.append('FRi')
+        if instance.run_sat:
+            days.append('SAT')
+        return days

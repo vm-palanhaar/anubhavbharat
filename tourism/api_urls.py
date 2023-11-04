@@ -9,4 +9,5 @@ urlpatterns = [
     path('idukaan/business/', include('business.idukaan.api.api_urls')),
     path('idukaan/ir/', include('indrail.idukaan.api.api_urls')),
     # Yatrigan
+    path('yatrigan/ir/', include('indrail.yatrigan.api.api_urls')),
 ]

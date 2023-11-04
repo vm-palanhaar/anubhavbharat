@@ -60,10 +60,10 @@ class ShopApi(viewsets.ViewSet, PermissionRequiredMixin):
             if org_emp != None and BApiV1Srv.ValidateOrgObj(org=org_emp.org) and org_emp.is_manager:
                 # check the shop license no exists in ShopLic
                 try:
-                    IrMdl.ShopLic.objects.get(reg_no = request.data['lic_no'])
+                    IrMdl.ShopDoc.objects.get(reg_no = request.data['lic_no'])
                     response_data.update(IrApiV1Msg.IrAddShopMsg.addShopFoundFailed())
                     return response_409(response_data)
-                except IrMdl.ShopLic.DoesNotExist:
+                except IrMdl.ShopDoc.DoesNotExist:
                     pass
                 serializer = IrSrl.AddShop_iDukaanSrl(data = request.data, context={
                             'org_emp':org_emp, 'org' : org_emp.org})

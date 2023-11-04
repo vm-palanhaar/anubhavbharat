@@ -2,7 +2,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 
-from tourism.models.timestamp import TimestampModel
+from tourism.models.timestamp import TimestampMdl
 
 class UserAccountManager(BaseUserManager):
 
@@ -21,7 +21,7 @@ class UserAccountManager(BaseUserManager):
         return user
 
 
-class User(AbstractBaseUser, TimestampModel, PermissionsMixin):
+class User(AbstractBaseUser, TimestampMdl, PermissionsMixin):
     # personal info
     first_name = models.CharField(max_length=150, verbose_name='First Name')
     last_name = models.CharField(max_length=150, verbose_name='Last Name')
