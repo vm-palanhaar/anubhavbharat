@@ -113,3 +113,7 @@ class IrShopStatusMsg:
                             "will remain disabled. To know more about verification process, please refer to the Settings and Help section.\n"\
             }
         }
+    
+class IrShopIssueMsg:
+    def addIrShopIssueSuccess():
+        return "We will be looking into it"

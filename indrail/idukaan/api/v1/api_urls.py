@@ -22,6 +22,9 @@ urlpatterns = [
                 'patch': 'partial_update',
                 'delete': 'destroy',
             })),
+            path('shop/<str:shopId>/issue', APIv1.ShopIssueApi.as_view({
+                'post': 'create',
+            })),
             #DEV
         ])),
         #DEV

@@ -263,3 +263,21 @@ class TrainSchedule_YatriganSrl(serializers.ModelSerializer):
         if instance.run_sat:
             days.append('SAT')
         return days
+    
+
+class AddShopIssue_iDukaanSrl(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
+    class Meta:
+        model = IRMdl.ShopIssue
+        fields = ['id','shop','desc']
+
+    def create(self, validated_data):
+        issue = IRMdl.ShopIssue.objects.create(
+            desc = validated_data['desc'],
+            shop = validated_data['shop'],
+            org_emp = self.context.get('org_emp'),
+            shop_emp = self.context.get('shop_emp'),
+        )
+        issue.save()
+        return issue
+    

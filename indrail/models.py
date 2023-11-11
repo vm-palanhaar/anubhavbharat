@@ -2,6 +2,8 @@ from django.core.validators import FileExtensionValidator
 from django.utils.translation import gettext_lazy as _
 from django.db import models
 
+from tourism.models.issue import IssueMdl
+
 from business import models as BMdl
 
 from tourism.models.shops import ShopMdl, ShopLicExpMdl, ShopEmpMdl
@@ -123,3 +125,11 @@ class TrainSchedule(models.Model):
     rev_dir = models.BooleanField(default=False, verbose_name='Reverse Direction')
     def __str__(self):
         return f'{self.station.name} - {self.station.code}'
+
+
+class ShopIssue(IssueMdl):
+    shop = models.ForeignKey(Shop, on_delete=models.CASCADE, verbose_name='Shop Name')
+    shop_emp = models.ForeignKey(ShopEmp, on_delete=models.CASCADE, null=True, blank=True, verbose_name='Shop Employee')
+    org_emp = models.ForeignKey(BMdl.OrgEmp, on_delete=models.CASCADE, null=True, blank=True, verbose_name='Org Employee')
+    def __str__(self):
+        return self.priority

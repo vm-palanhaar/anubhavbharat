@@ -342,3 +342,39 @@ class ShopEmpApi(viewsets.ViewSet, PermissionRequiredMixin):
         response_data.update(TErr.badActionUser(request = request, \
                 reason = 'irShopEmpDelete?shopEmpId_url={0}&body={1}'.format(kwargs['empId'], request.data['id'])))
         return response_403(response_data)
+
+
+class ShopIssueApi(viewsets.ViewSet, PermissionRequiredMixin):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated, UserPerm.IsVerified]
+
+    def create(self, request, *args, **kwargs):
+        response_data = {}
+        response_data['shop_id'] = kwargs['shopId']
+        # validate shop_id from URI and request body
+        if kwargs['shopId'] == request.data['shop']:
+            r_emp = IrApiV1Srv.ValidateOrgShopEmp(user=request.user, shop=kwargs['shopId'], org=kwargs['orgId'])
+            # variable r_emp and shop is not null
+            if r_emp != None and r_emp['shop'] != None:
+                serializer = IrSrl.AddShopIssue_iDukaanSrl(data=request.data,
+                            context={'org_emp':r_emp['orgEmp'],'shop_emp':r_emp['shopEmp']})
+                if serializer.is_valid():
+                    serializer.save()
+                    response_data['message'] = IrApiV1Msg.IrShopIssueMsg.addIrShopIssueSuccess()
+                    return response_201(response_data)
+                return response_400(serializer.errors)
+            if r_emp != None and r_emp['shop'] == None:
+                if r_emp['isMng']:
+                    response_data.update(IrApiV1Msg.IrShopList.irOrgShopNotFound())
+                    return response_400(response_data)
+                response_data.update(IrApiV1Msg.IrShopEmpMsg.irOrgShopEmpSelfNotFound())
+                return response_400(response_data)
+            # variable r_emp is null [r_emp is no more associated with org]
+            response_data.update(BApiV1Msg.OrgEmpMsg.businessOrgEmpSelfNotFound())
+            return response_400(response_data)
+        response_data.update(TErr.badActionUser(request = request, \
+                reason = 'irShopIssueCreate?shopId_url={0}&body={1}'.format(kwargs['shopId'], request.data['shop'])))
+        return response_403(response_data)
+
+    def list(self, request, *args, **kwargs):
+        pass

@@ -56,6 +56,10 @@ class ShopEmpAdmin(admin.TabularInline):
     model = IRMdl.ShopEmp
     extra = 0
 
+class ShopIssueAdmin(admin.TabularInline):
+    model = IRMdl.ShopIssue
+    extra = 0
+
 @admin.register(IRMdl.Shop)
 class ShopConfig(admin.ModelAdmin):
     fieldsets = (
@@ -65,7 +69,7 @@ class ShopConfig(admin.ModelAdmin):
         ('STATUS', {'fields':('is_open','is_active','is_verified','msg')}),
     )
     raw_id_fields = ['org','station']
-    inlines = [ShopDocAdmin,ShopEmpAdmin]
+    inlines = [ShopDocAdmin,ShopEmpAdmin,ShopIssueAdmin]
 
 
 class TrainScheduleAdmin(admin.TabularInline):
