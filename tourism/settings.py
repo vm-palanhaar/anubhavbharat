@@ -108,6 +108,10 @@ DATABASES = {
         'PASSWORD': os.getenv('DB_1_PGSQL_PWD'),
         'HOST': os.getenv('DB_1_PGSQL_HOST'),
         'PORT': os.getenv('DB_1_PGSQL_PORT'),
+        'TEST' : {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
 }
 
