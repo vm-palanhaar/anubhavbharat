@@ -41,6 +41,7 @@ class AddShop_iDukaanSrl(serializers.ModelSerializer):
     # station
     lat = serializers.CharField(write_only=True)
     lon = serializers.CharField(write_only=True)
+    station = serializers.CharField()
     plt1 = serializers.CharField(write_only=True, allow_blank=True, allow_null=True)
     plt2 = serializers.CharField(write_only=True, allow_blank=True, allow_null=True)
     # payments
@@ -66,7 +67,7 @@ class AddShop_iDukaanSrl(serializers.ModelSerializer):
             img = validated_data['img'],
             contact_no = validated_data['contact_no'],
             # station
-            station = validated_data['station'],
+            station = IRMdl.Station.objects.get(code = validated_data['station']),
             lat = validated_data['lat'],
             lon = validated_data['lon'],
             plt1 = validated_data['plt1'],

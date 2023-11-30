@@ -31,7 +31,7 @@ class StationCat(models.Model):
 class Station(models.Model):
     zone = models.ForeignKey(Zone, blank=True, null=True, on_delete=models.CASCADE, verbose_name='Railway Zone')
     div = models.ForeignKey(Div, blank=True, null=True, on_delete=models.CASCADE, verbose_name='Railway Division')
-    code = models.CharField(max_length=10, primary_key=True, verbose_name='Station Code')
+    code = models.CharField(max_length=10, verbose_name='Station Code')
     name = models.CharField(max_length=100, verbose_name='Station Name')
     plt = models.IntegerField(blank=True, null=True, verbose_name='No. of Platforms')
     cat = models.ForeignKey(StationCat, blank=True, null=True, on_delete=models.CASCADE, verbose_name='Station Category')
@@ -93,18 +93,17 @@ class ShopGst(ShopLicExpMdl):
     
 
 class Train(models.Model):
-    train_no = models.IntegerField(verbose_name='Train No', primary_key=True)
+    train_no = models.CharField(max_length=6, verbose_name='Train No', primary_key=True)
     train_name = models.CharField(max_length=60, verbose_name='Train Name')
-    station_from = models.ForeignKey(Station, on_delete=models.CASCADE, verbose_name='Station From', related_name='train_station_from')
-    station_to = models.ForeignKey(Station, on_delete=models.CASCADE, verbose_name='Station To', related_name='train_station_to')
-    run_sun = models.BooleanField(default=False, verbose_name='Train runs on Sunday')
-    run_mon = models.BooleanField(default=False, verbose_name='Train runs on Monday')
-    run_tue = models.BooleanField(default=False, verbose_name='Train runs on Tuesday')
-    run_wed = models.BooleanField(default=False, verbose_name='Train runs on Wednesday')
-    run_thu = models.BooleanField(default=False, verbose_name='Train runs on Thursday')
-    run_fri = models.BooleanField(default=False, verbose_name='Train runs on Friday')
-    run_sat = models.BooleanField(default=False, verbose_name='Train runs on Saturday')
-    run_daily = models.BooleanField(default=False, verbose_name='Train runs Daily')
+    station_from = models.ForeignKey(Station,null=True, blank=True, on_delete=models.CASCADE, verbose_name='Station From', related_name='train_station_from')
+    station_to = models.ForeignKey(Station,null=True, blank=True, on_delete=models.CASCADE, verbose_name='Station To', related_name='train_station_to')
+    run_sun = models.BooleanField(default=False, null=True, verbose_name='Train runs on Sunday')
+    run_mon = models.BooleanField(default=False, null=True, verbose_name='Train runs on Monday')
+    run_tue = models.BooleanField(default=False, null=True, verbose_name='Train runs on Tuesday')
+    run_wed = models.BooleanField(default=False, null=True, verbose_name='Train runs on Wednesday')
+    run_thu = models.BooleanField(default=False, null=True, verbose_name='Train runs on Thursday')
+    run_fri = models.BooleanField(default=False, null=True, verbose_name='Train runs on Friday')
+    run_sat = models.BooleanField(default=False, null=True, verbose_name='Train runs on Saturday')
     duration = models.CharField(max_length=15, null=True, blank=True, verbose_name='Duration')
     def __str__(self):
         return f'{self.train_no} - {self.train_name}'
