@@ -18,7 +18,7 @@ class ShopListApi(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         response_data = {}
         response_data['station'] = kwargs['station']
-        shops = IrMdl.Shop.objects.filter(station=kwargs['station'])
+        shops = IrMdl.Shop.objects.filter(station__code=kwargs['station'])
         if shops.filter(is_active=True, is_verified=True).count() != 0:
             serializer = self.get_serializer(shops.filter(is_active=True, is_verified=True), many=True)
             response_data['shops'] = serializer.data
@@ -39,7 +39,7 @@ class ShopInfoApi(generics.RetrieveAPIView):
         response_data = {}
         response_data['shopId'] = kwargs['shopId']
         try:
-          shop = IrMdl.Shop.objects.get(station=kwargs['station'], id=kwargs['shopId'], is_active=True, is_verified=True)
+          shop = IrMdl.Shop.objects.get(station__code=kwargs['station'], id=kwargs['shopId'], is_active=True, is_verified=True)
         except IrMdl.Shop.DoesNotExist:
             station = IrMdl.Station.objects.get(code = kwargs['station'])
             response_data.update(IrApiV1Msg.ShopListMsg.irShopListEmpty(station.name, station.code))
