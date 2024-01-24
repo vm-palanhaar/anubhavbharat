@@ -77,8 +77,8 @@ class TrainScheduleAdmin(admin.TabularInline):
 class TrainConfig(admin.ModelAdmin):
     fieldsets = (
         ('TRAIN', {'fields':('train_no','train_name')}),
-        ('STATION', {'fields':('station_from','station_to','duration')}),
-        ('RUN', {'fields':('run_sun','run_mon','run_tue','run_wed','run_thu','run_fri','run_sat')}),
+        ('STATION', {'fields':('source','destination','duration')}),
+        ('RUN', {'fields':('run_daily','run_sun','run_mon','run_tue','run_wed','run_thu','run_fri','run_sat')}),
     )
-    raw_id_fields = ['station_from','station_to']
+    raw_id_fields = ['source','destination']
     inlines = [TrainScheduleAdmin]

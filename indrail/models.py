@@ -44,6 +44,7 @@ def upload_to_shop_image_primary(instance,filename):
     return f'business/shop/ir/station/{folder_name}/{filename}'
 
 class Shop(ShopMdl):
+    id = models.UUIDField(primary_key=True)
     img = models.ImageField(_('Image'), upload_to=upload_to_shop_image_primary,
             validators=[FileExtensionValidator(allowed_extensions=["png","jpeg","jpg"])])
     # location
@@ -95,8 +96,8 @@ class ShopGst(ShopLicExpMdl):
 class Train(models.Model):
     train_no = models.CharField(max_length=6, verbose_name='Train No', primary_key=True)
     train_name = models.CharField(max_length=60, verbose_name='Train Name')
-    station_from = models.ForeignKey(Station,null=True, blank=True, on_delete=models.CASCADE, verbose_name='Station From', related_name='train_station_from')
-    station_to = models.ForeignKey(Station,null=True, blank=True, on_delete=models.CASCADE, verbose_name='Station To', related_name='train_station_to')
+    source = models.ForeignKey(Station,null=True, blank=True, on_delete=models.CASCADE, verbose_name='Station From', related_name='train_station_from')
+    destination = models.ForeignKey(Station,null=True, blank=True, on_delete=models.CASCADE, verbose_name='Station To', related_name='train_station_to')
     run_sun = models.BooleanField(default=False, null=True, verbose_name='Train runs on Sunday')
     run_mon = models.BooleanField(default=False, null=True, verbose_name='Train runs on Monday')
     run_tue = models.BooleanField(default=False, null=True, verbose_name='Train runs on Tuesday')
@@ -104,6 +105,7 @@ class Train(models.Model):
     run_thu = models.BooleanField(default=False, null=True, verbose_name='Train runs on Thursday')
     run_fri = models.BooleanField(default=False, null=True, verbose_name='Train runs on Friday')
     run_sat = models.BooleanField(default=False, null=True, verbose_name='Train runs on Saturday')
+    run_daily = models.BooleanField(default=False, null=True, verbose_name='Train runs Daily')
     duration = models.CharField(max_length=15, null=True, blank=True, verbose_name='Duration')
     def __str__(self):
         return f'{self.train_no} - {self.train_name}'
@@ -111,11 +113,12 @@ class Train(models.Model):
 
 class TrainSchedule(models.Model):
     train = models.ForeignKey(Train, on_delete=models.CASCADE, verbose_name='Train')
-    seq = models.IntegerField(verbose_name='Station No')
-    day = models.IntegerField(verbose_name='Day')
-    distance = models.IntegerField(verbose_name='Distance (in KMs)')
     station = models.ForeignKey(Station, on_delete=models.CASCADE, verbose_name='Station')
-    platform = models.CharField(max_length=6, blank=True, null=True, verbose_name='Platform')
+    seq = models.IntegerField(verbose_name='Station No')
+    dept_day = models.IntegerField(verbose_name='Departure Day')
+    arr_day = models.IntegerField(verbose_name='Arrival Day')
+    distance = models.IntegerField(verbose_name='Distance (in KMs)')
+    pltf = models.CharField(max_length=6, blank=True, null=True, verbose_name='Platform')
     dep_time = models.TimeField(null=True, blank=True, verbose_name='Departure Time')
     arv_time = models.TimeField(null=True, blank=True, verbose_name='Arrival Time')
     halt_time = models.TimeField(null=True, blank=True, verbose_name='Halt Time')

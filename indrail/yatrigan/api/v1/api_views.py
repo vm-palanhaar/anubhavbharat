@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from indrail import models as IrMdl
 from indrail import serializers as IrSrl
 from indrail.yatrigan.api.v1 import api_msg as IrApiV1Msg
+from indrail.yatrigan.api.v1.railapi import pnr_status
 
 def response_200(response_data):
     return Response(response_data, status=status.HTTP_200_OK)
@@ -69,13 +70,18 @@ class TrainScheduleApi(generics.GenericAPIView):
 
     def get(self, request, *args, **kwargs):
         response_data = {}
-        response_data['train'] = request.headers['train']
+        response_data['trainNo'] = request.headers['train']
         try:
             train = IrMdl.Train.objects.get(train_no=request.headers['train'])
         except IrMdl.Train.DoesNotExist:
             response_data.update(IrApiV1Msg.TrainMsg.irTrainNotFound())
             return response_400(response_data)  
         serializers = self.get_serializer(train)
-        response_data['schedule'] = serializers.data
+        response_data['trainSchedule'] = serializers.data
         return response_200(response_data)
        
+
+class PnrStatusApi(generics.GenericAPIView):
+
+    def post(self, request, *args, **kwargs):
+        return response_200(pnr_status.getPnrStatusApi(request.data['pnr']))

@@ -9,4 +9,5 @@ urlpatterns = [
     path('trainList', APIv1.TrainListApi.as_view()),
     path('trainSchedule', APIv1.TrainScheduleApi.as_view()),
     #DEV
+    path('pnrStatus', APIv1.PnrStatusApi.as_view()),
 ]

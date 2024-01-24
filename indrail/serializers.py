@@ -227,40 +227,45 @@ class _TrainScheduleStationList(serializers.ModelSerializer):
     
 
 class TrainSchedule_YatriganSrl(serializers.ModelSerializer):
-    station_from = serializers.SerializerMethodField()
-    station_to = serializers.SerializerMethodField()
-    stations = serializers.SerializerMethodField()
-    run_status = serializers.SerializerMethodField()
+    trainNo = serializers.CharField(source='train_no')
+    trainName = serializers.CharField(source='train_name')
+    source = serializers.SerializerMethodField()
+    destination = serializers.SerializerMethodField()
+    stationList = serializers.SerializerMethodField()
+    daysRun = serializers.SerializerMethodField()
     class Meta:
         model = IRMdl.Train
-        fields = ['train_no','train_name','station_from','station_to'
-                  ,'stations','run_status','duration']
+        fields = ['trainNo','trainName','source','destination'
+                  ,'stationList','daysRun','duration']
         
-    def get_station_from(self, instance):
-        return f'{instance.station_from.name} - {instance.station_from.code}'
+    def get_source(self, instance):
+        return f'{instance.source.name} - {instance.source.code}'
     
-    def get_station_to(self, instance):
-        return f'{instance.station_to.name} - {instance.station_from.code}'
+    def get_destination(self, instance):
+        return f'{instance.destination.name} - {instance.destination.code}'
 
-    def get_stations(self, instance):
+    def get_stationList(self, instance):
         schedule = IRMdl.TrainSchedule.objects.filter(train=instance)
         serializer = _TrainScheduleStationList(schedule, many=True)
         return serializer.data
     
-    def get_run_status(self, instance):
+    def get_daysRun(self, instance) -> str:
+        if instance.run_daily:
+            return "DAILY"
         days = []
         if instance.run_sun:
-            days.append('SUN')
+            days.append('SUN,')
         if instance.run_mon:
-            days.append('MON')
+            days.append('MON,')
         if instance.run_tue:
-            days.append('TUE')
+            days.append('TUE,')
         if instance.run_wed:
-            days.append('WED')
+            days.append('WED,')
         if instance.run_thu:
-            days.append('THU')
+            days.append('THU,')
         if instance.run_fri:
-            days.append('FRi')
+            days.append('FRI,')
         if instance.run_sat:
-            days.append('SAT')
-        return days
+            days.append('SAT,')
+        days = "".join(days)
+        return days[:len(days)-1]

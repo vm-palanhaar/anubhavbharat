@@ -53,6 +53,13 @@ class OrgTypesApi(generics.ListAPIView, PermissionRequiredMixin):
     serializer_class = BSrl.OrgTypesSerializer
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated, UserPerm.IsVerified]
+
+    def get(self, request, *args, **kwargs):
+        query = self.get_queryset()
+        serializer = self.get_serializer(query, many=True)
+        return response_200({
+            'orgTypeList' : serializer.data
+        })
     
 
 class OrgApi(viewsets.ViewSet, PermissionRequiredMixin):
