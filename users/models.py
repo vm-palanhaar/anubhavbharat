@@ -32,7 +32,7 @@ class User(AbstractBaseUser, TimestampMdl, PermissionsMixin):
     username = models.CharField(max_length=150, unique=True, verbose_name='Username')
     # status
     is_active = models.BooleanField(default=False, verbose_name='Active')
-    is_verified = models.BooleanField(default=False, verbose_name='Identity Verified')
+    is_kyc = models.BooleanField(default=False, verbose_name='Identity Verified')
     is_staff = models.BooleanField(default=False, verbose_name='Team Member')
     is_superuser = models.BooleanField(default=False, verbose_name='Administrator')
     # blocked reason is_active=false
