@@ -7,10 +7,13 @@ from users import models as UserMdl
 
 
 class UserSignupSerializer(serializers.ModelSerializer):
+    firstName = serializers.CharField(source='first_name')
+    lastName = serializers.CharField(source='last_name')
+    contactNo = serializers.CharField(source='contact_no')
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
     class Meta:
         model = UserMdl.User
-        fields = ['first_name','last_name','contact_no','email','username','password']
+        fields = ['firstName','lastName','contactNo','email','username','password']
 
     def create(self, validated_data):
         user = UserMdl.User.objects.create_user(
@@ -27,33 +30,27 @@ class UserSignupSerializer(serializers.ModelSerializer):
 
 class UserLoginSerializer(serializers.ModelSerializer):
     username = serializers.CharField()
-    first_name = serializers.CharField(read_only=True)
-    last_name = serializers.CharField(read_only=True)
-    is_verified = serializers.BooleanField(read_only=True)
+    firstName = serializers.CharField(read_only=True, source='first_name')
+    lastName = serializers.CharField(read_only=True, source='last_name')
+    isKyc = serializers.BooleanField(read_only=True, source='is_kyc')
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
     class Meta:
         model = UserMdl.User
-        fields = ['username','first_name','last_name','is_verified','password']
+        fields = ['username','firstName','lastName','isKyc','password']
 
     def validate(self, data):
         user = authenticate(**data)
         if user:
             return user
         return serializers.ValidationError()
-        #raise TExp.CustomValidation('message',UserApiV1Msg.UserLoginMsg.userLoginFailed_UserCredInvalid(), 400)
-
-
-class UserLoggedInSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(read_only=True)
-    first_name = serializers.CharField(read_only=True)
-    last_name = serializers.CharField(read_only=True)
-    is_verified = serializers.BooleanField(read_only=True)
-    class Meta:
-        model = UserMdl.User
-        fields = ['username','first_name','last_name','is_verified']
 
 
 class UserProfileSrl(serializers.ModelSerializer):
+    firstName = serializers.CharField(read_only=True, source='first_name')
+    lastName = serializers.CharField(read_only=True, source='last_name')
+    contactNo = serializers.CharField(source='contact_no')
+    isActive = serializers.BooleanField(read_only=True, source='is_active')
+    isKyc = serializers.BooleanField(read_only=True, source='is_kyc')
     class Meta:
         model = UserMdl.User
-        fields = ['first_name','last_name','username','email','contact_no','is_active','is_verified']
+        fields = ['firstName','lastName','username','email','contactNo','isActive','isKyc']

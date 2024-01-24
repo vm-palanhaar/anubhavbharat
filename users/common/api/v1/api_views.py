@@ -17,6 +17,7 @@ from users.common.api.v1 import api_msg as UserApiV1Msg
 1. UserSignupApi
 2. UserLoginApi
 3. UserLoggedInApi
+4. UserProfileApi
 # Dev
 '''
 
@@ -49,7 +50,7 @@ class UserSignupApi(generics.CreateAPIView):
             serializer.save()
             #TODO: Send email verification to user
             response_data = {
-                'user' : serializer.data,
+                'userData' : serializer.data,
                 'message' : UserApiV1Msg.UserSignUpMsg.userSignupSuccess()
             }
             return response_201(response_data)
@@ -71,18 +72,18 @@ class UserLoginApi(generics.GenericAPIView):
                     user = UserMdl.User.objects.get(username = request.data['username'])
                 except UserMdl.User.DoesNotExist:
                     response_data['message'] = UserApiV1Msg.UserLoginMsg.userLoginFailed_UserCredInvalid()
-                    return response_400(response_data)
+                    return response_401(response_data)
                 if user.is_active != True:
                     #TODO: Send email verification to user with identify verification
                     response_data['message'] = UserApiV1Msg.UserLoginMsg.userLoginFailed_UserInActive()
                     return response_403(response_data)
             else:
-                if user.is_verified != True:
+                if user.is_kyc != True:
                     #TODO: Send email instructions to user for identity verification
                     response_data['message'] = UserApiV1Msg.UserLoginMsg.userLoginSuccess_UserInVerfieid()
                     return response_403(response_data)
                 login(request, user)
-                response_data['user'] = serializer.data
+                response_data['userData'] = serializer.data
                 response_data['token'] = AuthToken.objects.create(user)[1]
                 response_data['message'] = UserApiV1Msg.UserLoginMsg.userLoginSuccess()
                 return response_201(response_data)
@@ -96,10 +97,10 @@ class UserLoggedInApi(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
-        response_data = {}
         request._auth.delete()
-        response_data['token'] = AuthToken.objects.create(request.user)[1]
-        return response_200(response_data)
+        return response_200({
+            'token' : AuthToken.objects.create(request.user)[1]
+        })
 
 
 class UserProfileApi(generics.RetrieveAPIView):
@@ -108,7 +109,7 @@ class UserProfileApi(generics.RetrieveAPIView):
     serializer_class = UserSrl.UserProfileSrl
 
     def get(self, request, *args, **kwargs):
-        response_data = {}
         serializer = self.get_serializer(request.user)
-        response_data['user'] = serializer.data
-        return response_200(response_data)
+        return response_200({
+            'userData' : serializer.data
+        })
