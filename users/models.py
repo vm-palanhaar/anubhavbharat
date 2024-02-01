@@ -8,7 +8,7 @@ class UserAccountManager(BaseUserManager):
 
     def create_superuser(self, email, username, first_name, last_name, contact_no, password=None, **other_fields):
         other_fields.setdefault('is_active', True)
-        other_fields.setdefault('is_verified', True)
+        other_fields.setdefault('is_kyc', True)
         other_fields.setdefault('is_staff', True)
         other_fields.setdefault('is_superuser', True)
         return self.create_user(email, username, first_name, last_name, contact_no, password, **other_fields)

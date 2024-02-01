@@ -49,7 +49,7 @@ def response_409(response_data):
 
 class ShopApi(viewsets.ViewSet, PermissionRequiredMixin):
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated, UserPerm.IsVerified]
+    permission_classes = [IsAuthenticated, UserPerm.IsKyc]
 
     def create(self, request, *args, **kwargs):
         response_data = {}
@@ -168,7 +168,7 @@ class ShopApi(viewsets.ViewSet, PermissionRequiredMixin):
 
 class ShopEmpApi(viewsets.ViewSet, PermissionRequiredMixin):
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated, UserPerm.IsVerified]
+    permission_classes = [IsAuthenticated, UserPerm.IsKyc]
 
     def create(self, request, *args, **kwargs):
         response_data = {}

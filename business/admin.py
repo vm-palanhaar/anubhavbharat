@@ -13,16 +13,16 @@ class OrgTypeConfig(admin.ModelAdmin):
     list_display = ['entity','doc_type','verified','pending']
 
     def verified(self, instance):
-        return BModel.Org.objects.filter(type=instance, is_verified=True).count()
+        return BModel.Org.objects.filter(type=instance, is_kyo=True).count()
     
     def pending(self, instance):
-        return BModel.Org.objects.filter(type=instance, is_verified=False).count()
+        return BModel.Org.objects.filter(type=instance, is_kyo=False).count()
     
 
 class OrgEmpAdmin(admin.TabularInline):
     model = BModel.OrgEmp
     extra = 0
-    fields = ['user','join_date','is_manager']
+    fields = ['user','join_date','is_mng']
 
 class OrgDocAdmin(admin.TabularInline):
     model = BModel.OrgDoc
@@ -32,7 +32,7 @@ class OrgDocAdmin(admin.TabularInline):
 @admin.register(BModel.Org)
 class OrgConfig(admin.ModelAdmin):
     list_display = ['name','type',]
-    list_filter = ['type','is_active','is_verified']
+    list_filter = ['type','is_active','is_kyo']
     search_fields = ['name',]
     raw_id_fields = ['type']
     inlines = [OrgEmpAdmin,OrgDocAdmin]

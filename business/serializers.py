@@ -11,32 +11,32 @@ from users import models as UserMdl
 class OrgTypesSerializer(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     doc = serializers.SerializerMethodField()
-    doc_no = serializers.SerializerMethodField()
+    docNo = serializers.SerializerMethodField()
     desc = serializers.SerializerMethodField()
-    is_doc = serializers.SerializerMethodField()
+    isDoc = serializers.SerializerMethodField()
     class Meta:
         model = BModel.OrgType
-        exclude = ['created_at','updated_at','doc_type']
+        exclude = ['created_at','updated_at','doc_type','is_doc1']
 
     def get_doc(self, obj):
         return obj.doc_type.doc
-    def get_doc_no(self, obj):
+    def get_docNo(self, obj):
         return obj.doc_type.doc_no
     def get_desc(self, obj):
         return obj.doc_type.desc
-    def get_is_doc(self, obj):
+    def get_isDoc(self, obj):
         return obj.doc_type.is_doc
 
 
 class AddOrgSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField(read_only=True)
-    reg_no = serializers.CharField(write_only=True,
+    id = serializers.CharField(read_only=True)
+    regNo = serializers.CharField(write_only=True, source='reg_no',\
             validators=[UniqueValidator(queryset=BModel.OrgDoc.objects.all())])
     doc = serializers.FileField(write_only=True, required=False)
-    end_date = serializers.DateField(allow_null=True)
+    docEndDate = serializers.DateField(allow_null=True, source='end_date', write_only=True)
     class Meta:
         model = BModel.Org
-        exclude = ['is_active','is_verified','created_at','updated_at']
+        exclude = ['is_active','is_kyo','created_at','updated_at','msg']
 
     def create(self, validated_data):
         org = BModel.Org.objects.create(
@@ -49,7 +49,7 @@ class AddOrgSerializer(serializers.ModelSerializer):
             org = org,
             user = self.context.get('user'),
             join_date = datetime.now().date(),
-            is_manager = True
+            is_mng = True
         )
         org_emp.save
         # save org doc
@@ -74,9 +74,11 @@ class AddOrgSerializer(serializers.ModelSerializer):
 
 class OrgListSerializer(serializers.ModelSerializer):
     id = serializers.CharField()
+    isActive = serializers.BooleanField(source='is_active')
+    isKyo = serializers.BooleanField(source='is_kyo')
     class Meta:
         model = BModel.Org
-        exclude = ['type','created_at','updated_at']
+        exclude = ['type','created_at','updated_at','is_active','is_kyo']
 
 
 class OrgInfoSerializer(serializers.ModelSerializer):
@@ -93,17 +95,19 @@ class OrgInfoSerializer(serializers.ModelSerializer):
 
 class AddOrgEmpSerializer(serializers.ModelSerializer):
     id = serializers.CharField(required=False, read_only=True)
+    isMng = serializers.BooleanField(source='is_mng')
+    joinDate = serializers.DateField(source='join_date')
     user = serializers.CharField()
     class Meta:
         model = BModel.OrgEmp
-        exclude = ['created_at','updated_at']
+        exclude = ['created_at','updated_at','is_mng','join_date']
 
     def create(self, validated_data):
         org_emp = BModel.OrgEmp.objects.create(
             org = validated_data['org'],
             user = self.context.get('user'),
             join_date = validated_data['join_date'],
-            is_manager = validated_data['is_manager']
+            is_mng = validated_data['is_mng']
         )
         org_emp.save
         return org_emp
@@ -111,11 +115,13 @@ class AddOrgEmpSerializer(serializers.ModelSerializer):
 
 class OrgEmpListSerializer(serializers.ModelSerializer):
     id = serializers.CharField()
+    joinDate = serializers.DateField(source='join_date')
+    isMng = serializers.BooleanField(source='is_mng')
     name = serializers.SerializerMethodField()
     exp = serializers.SerializerMethodField()
     class Meta:
         model = BModel.OrgEmp
-        exclude = ['user','org','created_at','updated_at']
+        exclude = ['user','org','created_at','updated_at','is_mng','join_date']
 
     def get_name(self, instance):
         user = UserMdl.User.objects.get(username=instance.user)
@@ -135,12 +141,13 @@ class OrgEmpListSerializer(serializers.ModelSerializer):
 
 
 class UpdateOrgEmpSerializer(serializers.ModelSerializer):
-    id = serializers.CharField(read_only=True)
     name = serializers.SerializerMethodField(read_only=True)
     exp = serializers.SerializerMethodField(read_only=True)
+    isMng = serializers.BooleanField(source='is_mng')
+    joinDate = serializers.DateField(source='join_date')
     class Meta:
         model = BModel.OrgEmp
-        fields = ['id', 'name', 'is_manager','join_date', 'exp']
+        fields = ['id', 'name', 'isMng','joinDate', 'exp']
 
     def get_name(self, instance):
         user = UserMdl.User.objects.get(username=instance.user)

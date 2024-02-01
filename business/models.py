@@ -14,22 +14,24 @@ class OrgDocType(TimestampMdl):
     desc = models.TextField()
     is_doc = models.BooleanField(default=False, verbose_name="Document Required")
     def __str__(self):
-        return f'{self.doc} - {self.doc_no}'
+        return f'{self.doc_no}'
 
 class OrgType(TimestampMdl):
     entity = models.CharField(max_length=30, verbose_name='Entity')
     doc_type = models.ForeignKey(OrgDocType, on_delete=models.CASCADE, verbose_name='Document')
+    is_doc1 = models.BooleanField(default=False, verbose_name='Primary Document')
     def __str__(self):
         return self.entity
 
 
 class Org(TimestampMdl):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     type = models.ForeignKey(OrgType, on_delete=models.CASCADE, verbose_name='Type')
     name = models.CharField(max_length=180, verbose_name='Name')
     # organization is operational
     is_active = models.BooleanField(default=True, verbose_name='Active')
     # organization verified by following SOPs
-    is_verified = models.BooleanField(default=False, verbose_name='Verified')
+    is_kyo = models.BooleanField(default=False, verbose_name='Verified')
     # message
     msg = models.TextField(blank=True, null=True, verbose_name='Message')
     def __str__(self):
@@ -41,7 +43,7 @@ class OrgEmp(TimestampMdl):
     org = models.ForeignKey(Org, on_delete=models.CASCADE, verbose_name='Organization')
     user = models.ForeignKey(UserModel.User, on_delete=models.CASCADE, verbose_name='User')
     join_date = models.DateField(verbose_name='Joining Date')
-    is_manager = models.BooleanField(default=False, verbose_name='Manager')
+    is_mng = models.BooleanField(default=False, verbose_name='Manager')
 
     def __str__(self):
         return f'{self.user.first_name} {self.user.last_name}'
@@ -53,6 +55,7 @@ def upload_to_org(instance,filename):
     return f'business/org/{pf_name}/{sf_name}/{filename}'
 
 class OrgDoc(TimestampMdl):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     org = models.ForeignKey(Org, on_delete=models.CASCADE, verbose_name='Organization')
     doc_type = models.ForeignKey(OrgDocType, on_delete=models.CASCADE, verbose_name='Document')
     reg_no = models.CharField(max_length=256, unique=True, verbose_name='Document No')

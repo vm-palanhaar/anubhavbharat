@@ -7,4 +7,4 @@ def ValidateOrgEmpObj(user, org):
             return None
         
 def ValidateOrgObj(org):
-    return org.is_active and org.is_verified
+    return org.is_active and org.is_kyo
