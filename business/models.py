@@ -50,8 +50,8 @@ class OrgEmp(TimestampMdl):
     
 
 def upload_to_org(instance,filename):
-    pf_name = f'{instance.org.id}_{instance.org.name}'
-    sf_name = f'{instance.doc_type.doc}'
+    pf_name = f'{instance.org.id}'
+    sf_name = f'{instance.doc_type.id}'
     return f'business/org/{pf_name}/{sf_name}/{filename}'
 
 class OrgDoc(TimestampMdl):
