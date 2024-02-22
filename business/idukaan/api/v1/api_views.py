@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from knox.auth import TokenAuthentication
 
-from tourism import api_errors as TErr
+from anubhavbharat import api_errors as TErr
 
 from business import models as BMdl
 from business import serializers as BSrl

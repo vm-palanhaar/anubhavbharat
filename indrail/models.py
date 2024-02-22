@@ -4,7 +4,7 @@ from django.db import models
 
 from business import models as BMdl
 
-from tourism.models.shops import ShopMdl, ShopLicExpMdl, ShopEmpMdl
+from anubhavbharat.models.shops import ShopMdl, ShopLicExpMdl, ShopEmpMdl
 
 
 class Zone(models.Model):

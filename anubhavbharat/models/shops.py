@@ -1,6 +1,6 @@
 from django.db import models
 
-from tourism.models.timestamp import TimestampMdl
+from anubhavbharat.models.timestamp import TimestampMdl
 
 from business import models as BMdl
 
