@@ -41,7 +41,7 @@ def response_409(response_data):
 
 
 class UserSignupApi(generics.CreateAPIView):
-    serializer_class = UserSrl.UserSignupSerializer
+    serializer_class = UserSrl.UserSignupSrl
 
     def post(self, request, *args, **kwargs):
         response_data = {}
@@ -60,7 +60,7 @@ class UserSignupApi(generics.CreateAPIView):
 
 
 class UserLoginApi(generics.GenericAPIView):
-    serializer_class = UserSrl.UserLoginSerializer
+    serializer_class = UserSrl.UserLoginSrl
 
     def post(self, request, *args, **kwargs):
         response_data = {}

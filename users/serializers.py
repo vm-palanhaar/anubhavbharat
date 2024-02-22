@@ -6,7 +6,7 @@ from django.contrib.auth.password_validation import validate_password
 from users import models as UserMdl
 
 
-class UserSignupSerializer(serializers.ModelSerializer):
+class UserSignupSrl(serializers.ModelSerializer):
     firstName = serializers.CharField(source='first_name')
     lastName = serializers.CharField(source='last_name')
     contactNo = serializers.CharField(source='contact_no')
@@ -28,7 +28,7 @@ class UserSignupSerializer(serializers.ModelSerializer):
 
         return user
 
-class UserLoginSerializer(serializers.ModelSerializer):
+class UserLoginSrl(serializers.ModelSerializer):
     username = serializers.CharField()
     firstName = serializers.CharField(read_only=True, source='first_name')
     lastName = serializers.CharField(read_only=True, source='last_name')
