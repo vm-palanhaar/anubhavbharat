@@ -9,7 +9,7 @@ from knox.auth import TokenAuthentication
 
 from users import models as UserMdl
 from users import serializers as UserSrl
-from users.common.api.v1 import api_msg as UserApiV1Msg
+from users.api.v1 import api_msg as UserApiV1Msg
 
 
 '''

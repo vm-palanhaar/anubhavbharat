@@ -1,7 +1,7 @@
 from django.urls import path
 from knox import views as knox_views
 
-from users.common.api.v1 import api_views as APIv1
+from users.api.v1 import api_views as APIv1
 
 urlpatterns = [
     #PROD
