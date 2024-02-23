@@ -42,7 +42,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'tourism.urls'
+ROOT_URLCONF = 'anubhavbharat.urls'
 
 TEMPLATES = [
     {
@@ -60,7 +60,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'tourism.wsgi.application'
+WSGI_APPLICATION = 'anubhavbharat.wsgi.application'
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -123,7 +123,8 @@ REST_KNOX = {
 
 STORAGES = {
     "default": {
-        "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+        #"BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
         "OPTIONS": {},
     },
     "staticfiles": {
@@ -131,8 +132,11 @@ STORAGES = {
     },
 }
 
-GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
-    os.path.join(BASE_DIR, os.getenv('GC_CRED')))
-GS_BUCKET_NAME = os.getenv('GCS_BUCKET_NAME')
-MEDIA_URL = 'https://storage.googleapis.com/{}/'.format(GS_BUCKET_NAME)
-GS_FILE_OVERWRITE = True
+# GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
+#     os.path.join(BASE_DIR, os.getenv('GC_CRED')))
+# GS_BUCKET_NAME = os.getenv('GCS_BUCKET_NAME')
+# MEDIA_URL = 'https://storage.googleapis.com/{}/'.format(GS_BUCKET_NAME)
+# GS_FILE_OVERWRITE = True
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
