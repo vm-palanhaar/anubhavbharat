@@ -51,8 +51,8 @@ class OrgEmp(TimestampMdl):
 
 def upload_to_org(instance,filename):
     pf_name = f'{instance.org.id}'
-    sf_name = f'{instance.doc_type.id}'
-    return f'business/org/{pf_name}/{sf_name}/{filename}'
+    sf_name = f'{instance.doc_type.doc}'
+    return f'business/orgdoc/{pf_name}/{sf_name}/{filename}'
 
 class OrgDoc(TimestampMdl):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)

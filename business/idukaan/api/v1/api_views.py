@@ -1,8 +1,9 @@
 from django.contrib.auth.mixins import PermissionRequiredMixin
 
-from rest_framework import status, generics, viewsets
+from rest_framework import status, viewsets
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
 
 from knox.auth import TokenAuthentication
 
@@ -10,22 +11,22 @@ from anubhavbharat import api_errors as TErr
 
 from business import models as BMdl
 from business import serializers as BSrl
-from business import permissions as BPerm
 from business.idukaan.api.v1 import api_msg as BApiV1Msg
 from business.idukaan.api.v1 import api_srv as BApiV1Srv
 
 from users import models as UserMdl
-from users import serializers as UserSrl
 from users import permissions as UserPerm
 from users.api.v1 import api_msg as UserApiV1Msg
 
 
 '''
-PROD
-1. OrgTypesApi
-2. OrgApi
-3. OrgEmpApi
-DEV
+---PROD---
+1. list_org_types
+2. add_org
+3. list_org
+4. org_info
+
+---DEV---
 '''
 
 
@@ -48,57 +49,61 @@ def response_409(response_data):
     return Response(response_data, status=status.HTTP_409_CONFLICT)
 
 
-class OrgTypesApi(generics.ListAPIView, PermissionRequiredMixin):
-    queryset = BMdl.OrgType.objects.filter(is_doc1=True)
-    serializer_class = BSrl.OrgTypesSerializer
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated, UserPerm.IsKyc]
-
-    def get(self, request, *args, **kwargs):
-        query = self.get_queryset()
-        serializer = self.get_serializer(query, many=True)
-        return response_200({
+@api_view(['GET'])
+@permission_classes([IsAuthenticated, UserPerm.IsKyc])
+@authentication_classes([TokenAuthentication])
+def list_org_types(request):
+    query = BMdl.OrgType.objects.filter(is_doc1=True)
+    serializer = BSrl.ListOrgTypeSrl(query, many=True)
+    return response_200({
             'orgTypeList' : serializer.data
         })
-    
 
-class OrgApi(viewsets.ViewSet, PermissionRequiredMixin):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated, UserPerm.IsKyc]
 
-    def create(self, request, *args, **kwargs):
-        response_data = {}
-        serializer = BSrl.AddOrgSerializer(data=request.data, context={'user': request.user})
-        if serializer.is_valid():
+@api_view(['POST'])
+@permission_classes([IsAuthenticated, UserPerm.IsKyc])
+@authentication_classes([TokenAuthentication])
+def add_org(request):
+    response_data = {}
+    serializer = BSrl.AddOrgSrl(data=request.data, context={'user': request.user})
+    if serializer.is_valid():
             serializer.save()
             response_data['orgData'] = serializer.data
             response_data['message'] = BApiV1Msg.AddOrgMsg.addOrgSuccess()
             return response_201(response_data)
             #TODO: validate the reg number w.r.t. doc type
-        if 'regNo' in serializer.errors and serializer.errors['regNo'][0].code == 'unique':
+    if 'regNo' in serializer.errors and serializer.errors['regNo'][0].code == 'unique':
             return response_409(BApiV1Msg.AddOrgMsg.addOrgFoundFailed())
-        return response_400(serializer.errors)
-    
-    def list(self, request, *args, **kwargs):
-        response_data = {}
-        queryset = request.user.orgemp_set.all()
-        if queryset.count() > 0:
-            orgs = []
-            for org_emp in queryset:
-                response_map = BSrl.OrgListSerializer(org_emp.org).data
-                response_map['isMng'] = org_emp.is_mng
-                orgs.append(response_map)
-            response_data['orgList'] = orgs
-            response_data['isKyoFalseMsg'] = BApiV1Msg.OrgStatusMsg.businessOrgNotVerified()['error']['message']
-            return Response(response_data, status=status.HTTP_200_OK)
-        return response_400(BApiV1Msg.OrgListMsg.orgListFailed_NotFound())
+    return response_400(serializer.errors)
 
-    def retrieve(self, request, *args, **kwargs):
-        org_emp = BApiV1Srv.ValidateOrgEmpObj(user=request.user, org=kwargs['orgId'])
-        if org_emp != None:
-            serializer = BSrl.OrgInfoSerializer(org_emp.org)
-            return response_200(serializer.data)
-        return response_403(BApiV1Msg.OrgEmpMsg.businessOrgEmpSelfNotFound())
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated, UserPerm.IsKyc])
+@authentication_classes([TokenAuthentication])
+def list_org(request):
+    response_data = {}
+    queryset = request.user.orgemp_set.all()
+    if queryset.count() > 0:
+        orgs = []
+        for org_emp in queryset:
+            response_map = BSrl.ListOrgSrl(org_emp.org).data
+            response_map['isMng'] = org_emp.is_mng
+            orgs.append(response_map)
+        response_data['orgList'] = orgs
+        response_data['isKyoFalseMsg'] = BApiV1Msg.OrgStatusMsg.businessOrgNotVerified()['error']['message']
+        return Response(response_data, status=status.HTTP_200_OK)
+    return response_400(BApiV1Msg.OrgListMsg.orgListFailed_NotFound())
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated, UserPerm.IsKyc])
+@authentication_classes([TokenAuthentication])
+def org_info(request):
+    org_emp = BApiV1Srv.ValidateOrgEmpObj(user=request.user, org=request.data['orgId'])
+    if org_emp != None:
+        serializer = BSrl.OrgInfoSrl(org_emp.org)
+        return response_200(serializer.data)
+    return response_403(BApiV1Msg.OrgEmpMsg.businessOrgEmpSelfNotFound())
 
 
 class OrgEmpApi(viewsets.ViewSet, PermissionRequiredMixin):

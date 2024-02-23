@@ -8,7 +8,7 @@ from business import models as BModel
 from users import models as UserMdl
 
 
-class OrgTypesSerializer(serializers.ModelSerializer):
+class ListOrgTypeSrl(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     doc = serializers.SerializerMethodField()
     docNo = serializers.SerializerMethodField()
@@ -28,7 +28,7 @@ class OrgTypesSerializer(serializers.ModelSerializer):
         return obj.doc_type.is_doc
 
 
-class AddOrgSerializer(serializers.ModelSerializer):
+class AddOrgSrl(serializers.ModelSerializer):
     id = serializers.CharField(read_only=True)
     regNo = serializers.CharField(write_only=True, source='reg_no',\
             validators=[UniqueValidator(queryset=BModel.OrgDoc.objects.all())])
@@ -72,7 +72,7 @@ class AddOrgSerializer(serializers.ModelSerializer):
         return org
 
 
-class OrgListSerializer(serializers.ModelSerializer):
+class ListOrgSrl(serializers.ModelSerializer):
     id = serializers.CharField()
     isActive = serializers.BooleanField(source='is_active')
     isKyo = serializers.BooleanField(source='is_kyo')
@@ -81,7 +81,7 @@ class OrgListSerializer(serializers.ModelSerializer):
         exclude = ['type','created_at','updated_at','is_active','is_kyo']
 
 
-class OrgInfoSerializer(serializers.ModelSerializer):
+class OrgInfoSrl(serializers.ModelSerializer):
     id = serializers.CharField()
     type = serializers.CharField()
     emp = serializers.SerializerMethodField()
