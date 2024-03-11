@@ -15,8 +15,5 @@ urlpatterns = [
     path('org/emp/delete', APIv1.delete_org_emp, name = 'delete-org-emp'),
     
     #<---DEV--->
-    path('org/<str:orgId>/emp/<str:orgEmpId>', APIv1.OrgEmpApi.as_view({
-        'patch': 'partial_update',
-        'delete': 'destroy',
-    })),
+    
 ]
