@@ -25,6 +25,7 @@ from users.api.v1 import api_msg as UserApiV1Msg
 2. add_org
 3. list_org
 4. org_info
+5. add_org_emp
 
 ---DEV---
 '''
@@ -106,146 +107,141 @@ def org_info(request):
     return response_403(BApiV1Msg.OrgEmpMsg.businessOrgEmpSelfNotFound())
 
 
-class OrgEmpApi(viewsets.ViewSet, PermissionRequiredMixin):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated, UserPerm.IsKyc]
+@api_view(['POST'])
+@permission_classes([IsAuthenticated, UserPerm.IsKyc])
+@authentication_classes([TokenAuthentication])
+def add_org_emp(request):
+    response_data = {}
+    response_data['orgId'] = request.data['org']
+    org_emp = BApiV1Srv.ValidateOrgEmpObj(user=request.user, org=request.data['org'])
+    # org is active, verified & employee is manager of the org
+    if org_emp != None and BApiV1Srv.ValidateOrgObj(org=org_emp.org) and org_emp.is_mng:
+        # check the requested user exists in users profile
+        try:
+            user = UserMdl.User.objects.get(username = request.data['user'])
+        except UserMdl.User.DoesNotExist:
+            response_data.update(UserApiV1Msg.usernameUserNotFound())
+            return response_400(response_data)
+        if user.is_active == False and user.is_kyc == False:
+            response_data.update(UserApiV1Msg.userInActiveNotVerified(user = user))
+            return response_400(response_data)
+        elif user.is_kyc == False:
+            response_data.update(UserApiV1Msg.userNotVerified(user = user))
+            return response_400(response_data)
+        elif user.is_active == False:
+            response_data.update(UserApiV1Msg.userInActive(user = user))
+            return response_400(response_data)
+        # check the requested user already associated with org
+        try:
+            emp = BMdl.OrgEmp.objects.get(user=user,org=request.data['org'])
+            response_data.update(BApiV1Msg.OrgEmpMsg.businessOrgEmpFound(emp))
+            return response_409(response_data)
+        except BMdl.OrgEmp.DoesNotExist:
+            serializer = BSrl.AddOrgEmpSerializer(data=request.data, context={'user': user})
+            if serializer.is_valid():
+                serializer.save()
+                response_data['newOrgEmpData'] = serializer.data
+                response_data['message'] = BApiV1Msg.OrgEmpMsg.businessOrgEmpAddSuccess(emp_user = user)
+                return response_201(response_data)
+            return response_400(serializer.errors)
+    # org is active and verified & employee is not manager of the org
+    if org_emp != None and org_emp.is_mng == False:
+        response_data.update(BApiV1Msg.OrgEmpMsg.businessOrgEmpNotMng(org = org_emp.org))
+        return response_403(response_data)
+    # org is active and not verified
+    if org_emp != None and org_emp.org.is_kyo == False:
+        response_data.update(BApiV1Msg.OrgStatusMsg.businessOrgNotVerified())
+        return response_403(response_data)
+    # employee is not part of organization
+    response_data.update(BApiV1Msg.OrgEmpMsg.businessOrgEmpSelfNotFound())
+    return response_403(response_data)
 
-    def create(self, request, *args, **kwargs):
-        response_data = {}
-        response_data['orgId'] = kwargs['orgId']
-        # validate org_id from URI and request body
-        if kwargs['orgId'] == request.data['org']:
-            org_emp = BApiV1Srv.ValidateOrgEmpObj(user=request.user, org=kwargs['orgId'])
-            # org is active and verified & employee is manager of the org
-            if org_emp != None and BApiV1Srv.ValidateOrgObj(org=org_emp.org) and org_emp.is_mng:
-                # check the requested user exists in users profile
-                try:
-                    user = UserMdl.User.objects.get(username = request.data['user'])
-                except UserMdl.User.DoesNotExist:
-                    response_data.update(UserApiV1Msg.usernameUserNotFound())
-                    return response_400(response_data)
-                if user.is_active == False and user.is_kyc == False:
-                    response_data.update(UserApiV1Msg.userInActiveNotVerified(user = user))
-                    return response_400(response_data)
-                elif user.is_kyc == False:
-                    response_data.update(UserApiV1Msg.userNotVerified(user = user))
-                    return response_400(response_data)
-                elif user.is_active == False:
-                    response_data.update(UserApiV1Msg.userInActive(user = user))
-                    return response_400(response_data)
-                # check the requested user already associated with org
-                try:
-                    emp = BMdl.OrgEmp.objects.get(user=user,org=request.data['org'])
-                    response_data.update(BApiV1Msg.OrgEmpMsg.businessOrgEmpFound(emp))
-                    return response_409(response_data)
-                except BMdl.OrgEmp.DoesNotExist:
-                    pass
-                serializer = BSrl.AddOrgEmpSerializer(data=request.data, context={'user': user})
-                if serializer.is_valid():
-                    serializer.save()
-                    response_data['newOrgEmpData'] = serializer.data
-                    response_data['message'] = BApiV1Msg.OrgEmpMsg.businessOrgEmpAddSuccess(emp_user = user)
-                    return response_201(response_data)
-                return response_400(serializer.errors)
-            # org is active and verified & employee is not manager of the org
-            if org_emp != None and org_emp.is_mng == False:
-                response_data.update(BApiV1Msg.OrgEmpMsg.businessOrgEmpNotMng(org = org_emp.org))
-                return response_403(response_data)
-            # org is active and not verified
-            if org_emp != None and org_emp.org.is_kyo == False:
-                response_data.update(BApiV1Msg.OrgStatusMsg.businessOrgNotVerified())
-                return response_403(response_data)
-            # employee is not part of organization
-            response_data.update(BApiV1Msg.OrgEmpMsg.businessOrgEmpSelfNotFound())
-            return response_403(response_data)
-        response_data.update(TErr.badActionUser(request = request, \
-                reason = 'orgEmpCreate?orgId_url={0}&body={1}'.format(kwargs['orgId'], request.data['org'])))
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated, UserPerm.IsKyc])
+@authentication_classes([TokenAuthentication])
+def list_org_emp(request):
+    response_data = {}
+    response_data['orgId'] = request.data['org']
+    org_emp = BApiV1Srv.ValidateOrgEmpObj(user = request.user, org = request.data['org'])
+    if org_emp != None:
+        employees = BMdl.OrgEmp.objects.filter(org = request.data['org'])
+        serializer = BSrl.OrgEmpListSerializer(employees, many=True)
+        response_data['orgEmpList'] = serializer.data
+        return Response(response_data, status=status.HTTP_200_OK)
+    response_data.update(BApiV1Msg.OrgEmpMsg.businessOrgEmpSelfNotFound())
+    return response_403(response_data)
+
+
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated, UserPerm.IsKyc])
+@authentication_classes([TokenAuthentication])
+def update_org_emp(request):
+    response_data = {}
+    response_data['orgId'] = request.data['org']
+    response_data['orgEmpId'] = request.data['orgEmp']
+    org_emp = BApiV1Srv.ValidateOrgEmpObj(user = request.user, org = request.data['org'])
+    # org is active and verified & employee is manager of the org
+    if org_emp != None and BApiV1Srv.ValidateOrgObj(org=org_emp.org) and org_emp.is_mng:
+        try:
+            req_org_emp = BMdl.OrgEmp.objects.get(id = request.data['orgEmp'])
+        except BMdl.OrgEmp.DoesNotExist:
+            response_data.update(BApiV1Msg.OrgEmpMsg.businessOrgEmpNotFound(org = org_emp.org))
+            return response_400(response_data)
+        # check if user is updating/deleting self
+        if request.user == req_org_emp.user:
+            response_data.update(BApiV1Msg.OrgEmpMsg.businessOrgEmpSelfUd(org = org_emp.org))
+            return response_400(response_data)
+        serializer = BSrl.UpdateOrgEmpSerializer(req_org_emp, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            response_data['updatedOrgEmpData'] = serializer.data
+            response_data['message'] = BApiV1Msg.OrgEmpMsg.businessOrgEmpUpdateSuccess(emp_user = req_org_emp.user)
+            return response_200(response_data)
+        return response_400(serializer.errors)
+    # org is active and verified & employee is not manager of the org
+    if org_emp != None and org_emp.is_mng == False:
+        response_data.update(BApiV1Msg.OrgEmpMsg.businessOrgEmpNotMng(org = org_emp.org))
         return response_403(response_data)
-    
-    def list(self, request, *args, **kwargs):
-        response_data = {}
-        response_data['orgId'] = kwargs['orgId']
-        org_emp = BApiV1Srv.ValidateOrgEmpObj(user=request.user, org=kwargs['orgId'])
-        if org_emp != None:
-            employees = BMdl.OrgEmp.objects.filter(org=kwargs['orgId'])
-            serializer = BSrl.OrgEmpListSerializer(employees, many=True)
-            response_data['orgEmpList'] = serializer.data
-            return Response(response_data, status=status.HTTP_200_OK)
-        response_data.update(BApiV1Msg.OrgEmpMsg.businessOrgEmpSelfNotFound())
+    # org is active and not verified
+    if org_emp != None and org_emp.org.is_kyo == False:
+        response_data.update(BApiV1Msg.OrgStatusMsg.businessOrgNotVerified())
         return response_403(response_data)
-    
-    def partial_update(self, request, *args, **kwargs):
-        response_data = {}
-        response_data['id'] = kwargs['orgEmpId']
-        response_data['orgId'] = kwargs['orgId']
-        # validate id from URI and request body
-        if kwargs['orgEmpId'] == request.data['id']:
-            org_emp = BApiV1Srv.ValidateOrgEmpObj(user=request.user, org=kwargs['orgId'])
-            # org is active and verified & employee is manager of the org
-            if org_emp != None and BApiV1Srv.ValidateOrgObj(org=org_emp.org) and org_emp.is_mng:
-                try:
-                    req_emp = BMdl.OrgEmp.objects.get(id = request.data['id'])
-                except BMdl.OrgEmp.DoesNotExist:
-                    response_data.update(BApiV1Msg.OrgEmpMsg.businessOrgEmpNotFound(org = org_emp.org))
-                    return response_400(response_data)
-                # check if user is update/delete self
-                if request.user == req_emp.user:
-                    response_data.update(BApiV1Msg.OrgEmpMsg.businessOrgEmpSelfUd(org = org_emp.org))
-                    return response_400(response_data)
-                serializer = BSrl.UpdateOrgEmpSerializer(req_emp, data=request.data, partial=True)
-                if serializer.is_valid():
-                    serializer.save()
-                    response_data['updatedOrgEmpData'] = serializer.data
-                    response_data['message'] = BApiV1Msg.OrgEmpMsg.businessOrgEmpUpdateSuccess(emp_user = req_emp.user)
-                    return response_200(response_data)
-                return response_400(serializer.errors)
-            # org is active and verified & employee is not manager of the org
-            if org_emp != None and org_emp.is_mng == False:
-                response_data.update(BApiV1Msg.OrgEmpMsg.businessOrgEmpNotMng(org = org_emp.org))
-                return response_403(response_data)
-            # org is active and not verified
-            if org_emp != None and org_emp.org.is_kyo == False:
-                response_data.update(BApiV1Msg.OrgStatusMsg.businessOrgNotVerified())
-                return response_403(response_data)
-            # employee is not part of organization
-            response_data.update(BApiV1Msg.OrgEmpMsg.businessOrgEmpSelfNotFound())
-            return response_403(response_data)
-        response_data.update(TErr.badActionUser(request = request, \
-                reason = 'orgEmpPartialUpdate?orgEmpId_url={0}&body={1}'.format(kwargs['orgEmpId'], request.data['id'])))
+    # employee is not part of organization
+    response_data.update(BApiV1Msg.OrgEmpMsg.businessOrgEmpSelfNotFound())
+    return response_403(response_data)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated, UserPerm.IsKyc])
+@authentication_classes([TokenAuthentication])
+def delete_org_emp(request):
+    response_data = {}
+    response_data['orgId'] = request.data['org']
+    response_data['orgEmpId'] = request.data['orgEmp']
+    org_emp = BApiV1Srv.ValidateOrgEmpObj(user = request.user, org = request.data['org'])
+    # org is active, verified & employee is manager of the org
+    if org_emp != None and BApiV1Srv.ValidateOrgObj(org=org_emp.org) and org_emp.is_mng:
+        try:
+            req_org_emp = BMdl.OrgEmp.objects.get(id = request.data['orgEmp'])
+        except BMdl.OrgEmp.DoesNotExist:
+            response_data.update(BApiV1Msg.OrgEmpMsg.businessOrgEmpNotFound(org = org_emp.org))
+            return response_400(response_data)
+        # check if user is updating/deleting self
+        if request.user == req_org_emp.user:
+            response_data.update(BApiV1Msg.OrgEmpMsg.businessOrgEmpSelfUd(org = org_emp.org))
+            return response_400(response_data)
+        response_data['message'] = BApiV1Msg.OrgEmpMsg.businessOrgEmpDeleteSuccess(emp_user = req_org_emp)
+        req_org_emp.delete()
+        return response_200(response_data)
+    # org is active and verified & employee is not manager of the org
+    if org_emp != None and org_emp.is_mng == False:
+        response_data.update(BApiV1Msg.OrgEmpMsg.businessOrgEmpNotMng(org = org_emp.org))
         return response_403(response_data)
-    
-    def destroy(self, request, *args, **kwargs):
-        response_data = {}
-        response_data['id'] = kwargs['orgEmpId']
-        response_data['orgId'] = kwargs['orgId']
-        # validate id from URI and request body
-        if kwargs['orgEmpId'] == request.data['id']:
-            org_emp = BApiV1Srv.ValidateOrgEmpObj(user=request.user, org=kwargs['orgId'])
-            # org is active and verified & employee is manager of the org
-            if org_emp != None and BApiV1Srv.ValidateOrgObj(org=org_emp.org) and org_emp.is_mng:
-                try:
-                    req_emp = BMdl.OrgEmp.objects.get(id = request.data['id'])
-                except BMdl.OrgEmp.DoesNotExist:
-                    response_data.update(BApiV1Msg.OrgEmpMsg.businessOrgEmpNotFound(org = org_emp.org))
-                    return response_400(response_data)
-                # check if user is update/delete self
-                if request.user == req_emp.user:
-                    response_data.update(BApiV1Msg.OrgEmpMsg.businessOrgEmpSelfUd(org = org_emp.org))
-                    return response_400(response_data)
-                response_data['message'] = BApiV1Msg.OrgEmpMsg.businessOrgEmpDeleteSuccess(emp_user = req_emp)
-                req_emp.delete()
-                return response_200(response_data)
-            # org is active and verified & employee is not manager of the org
-            if org_emp != None and org_emp.is_mng == False:
-                response_data.update(BApiV1Msg.OrgEmpMsg.businessOrgEmpNotMng(org = org_emp.org))
-                return response_403(response_data)
-            # org is active and not verified
-            if org_emp != None and org_emp.org.is_kyo == False:
-                response_data.update(BApiV1Msg.OrgStatusMsg.businessOrgNotVerified())
-                return response_403(response_data)
-            # employee is not part of organization
-            response_data.update(BApiV1Msg.OrgEmpMsg.businessOrgEmpSelfNotFound())
-            return response_403(response_data)
-        response_data.update(TErr.badActionUser(request = request, \
-                reason = 'orgEmpDestroy?orgEmpId_url={0}&body={1}'.format(kwargs['orgEmpId'], request.data['id'])))
+    # org is active and not verified
+    if org_emp != None and org_emp.org.is_kyo == False:
+        response_data.update(BApiV1Msg.OrgStatusMsg.businessOrgNotVerified())
         return response_403(response_data)
+    # employee is not part of organization
+    response_data.update(BApiV1Msg.OrgEmpMsg.businessOrgEmpSelfNotFound())
+    return response_403(response_data)
