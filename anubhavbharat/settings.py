@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'users',
     'business',
     'indrail',
+    'gg',
 ]
 
 AUTH_USER_MODEL = 'users.User'
