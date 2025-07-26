@@ -11,7 +11,7 @@ class Zone(models.Model):
     code = models.CharField(max_length=5, primary_key=True, verbose_name='Zone Code')
     name = models.CharField(max_length=90, verbose_name='Zone Name')
     def __str__(self):
-        return self.name()
+        return self.name
 
 
 class Div(models.Model):
